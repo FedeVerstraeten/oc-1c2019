@@ -80,7 +80,7 @@ sudo sshfs -p 2222 -C root@127.0.0.1:/root $(pwd)/guestFS
 
 Ahora simplemente se copian las cosas dentro de ese directorio. Si es la primera vez que se ejecuta el emulador, conviene copiar los archivos `_.vimrc` (reemplazar el que ya están en el **GUEST**) y `createTunnel.sh`.
 
-También se puede correr el script 'mountGuestFS.sh' para automatizar el montaje.
+También se puede correr el script `mountGuestFS.sh` para automatizar el montaje.
 
 Para poder ingresar a 'mi_directorio_montado' desde Ubuntu, como el script 'mountGuestFS.sh' se ejecutó en modo SU, hay que abrir un explorador de archivos en modo SU, por ejemplo, en Ubuntu con Nautilus: `sudo nautilus`
 
