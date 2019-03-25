@@ -5,9 +5,9 @@
  @Filename: unix2dos.c
 --------------------------------------------------------------
  @Authors:
-    Battan, Manuel.
+    Battan, Manuel Victoriano.
           mvbattan at gmail dot com
-    Gamarra, Cynthia.
+    Gamarra Silva, Cynthia Marlene.
           cyntgamarra at gmail dot com
     Verstraeten, Federico.
           federico.verstraeten at gmail dot com
