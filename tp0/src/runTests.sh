@@ -30,9 +30,6 @@
 #
 # ------------------------------------------------------------
 
-# Program name to test.
-PROGRAM_NAME='./tp0'
-
 # Failed tests counter.
 failedTests=0;
 
@@ -75,16 +72,18 @@ function error_msg() {
 # Input parameters tests.
 # ------------------------------------------------------------
 
-# Define the expected outputs of each of the test cases with its associated
-# test functions.
-EXPECTED_OUTPUT_INEXISTENT_INPUT_STREAM=("ERROR: Can't open input stream.")
+# Define the expected outputs of each of the test cases with 
+# its associated test functions.
 
 function test1_parameter_input_inexistent_stream(){
+
+  EXPECTED_OUTPUT_INEXISTENT_INPUT_STREAM=("ERROR: Can't open input stream.")
+
   header "TEST1: inexistent 'input' stream."
 
   commands=(
   "-i 1"
-  "-i hola.bin"
+  "-i false_input.txt"
   )
 
   for i in "${commands[@]}"
@@ -104,33 +103,10 @@ function test1_parameter_input_inexistent_stream(){
   done
 }
 
-EXPECTED_OUTPUT_INPUT_NO_ARGUMENT=("./tp0: option requires an argument -- 'i'")
-
-function test11_parameter_input_no_argument(){
-  header "TEST11: no 'input' option parameters."
-
-  commands=("-i ")
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_INPUT_NO_ARGUMENT" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-EXPECTED_OUTPUT_INPUT_INVALID_STREAM=("ERROR: Invalid input stream.")
-
 function test12_parameter_input_invalid_stream(){
+
+  EXPECTED_OUTPUT_INPUT_INVALID_STREAM=("ERROR: Invalid input stream.")
+
   header "TEST12: invalid 'input' stream."
 
   commands=(
@@ -157,16 +133,19 @@ function test12_parameter_input_invalid_stream(){
   done
 }
 
-EXPECTED_OUTPUT_INVALID_OUTPUT_STREAM=("ERROR: Invalid output stream.")
-
 function test2_parameter_output_stream(){
+
+  EXPECTED_OUTPUT_INVALID_OUTPUT_STREAM=("ERROR: Invalid output stream.")
+
+  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2.*/\1/g')
+
   header "TEST2: invalid 'output' stream."
 
   commands=(
-  "-i ../tests/leviathan.input -o ."
-  "-i ../tests/leviathan.input -o .."
-  "-i ../tests/leviathan.input -o /"
-  "-i ../tests/leviathan.input -o //"
+  "-i ../test/loremipsum_${INPUT_FILE}.txt -o ."
+  "-i ../test/loremipsum_${INPUT_FILE}.txt -o .."
+  "-i ../test/loremipsum_${INPUT_FILE}.txt -o /"
+  "-i ../test/loremipsum_${INPUT_FILE}.txt -o //"
   )
 
   for i in "${commands[@]}"
@@ -186,94 +165,18 @@ function test2_parameter_output_stream(){
   done
 }
 
-EXPECTED_OUTPUT_OUTPUT_NO_ARGUMENT=("./tp0: option requires an argument -- 'o'")
-
-function test21_parameter_output_no_argument(){
-  header "TEST21: no 'output' option parameters."
-
-  commands=("-o ")
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_OUTPUT_NO_ARGUMENT" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-EXPECTED_OUTPUT_INVALID_ACTION=("ERROR: Invalid action argument.")
-
-function test3_parameter_action(){
-  header "TEST3: invalid 'action' parameters."
-
-  commands=(
-  "-a bad_action"
-  "-a 1"
-  "-a ."
-  "-a .."
-  "-a /"
-  "-a //"
-  "-a $"
-  )
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_INVALID_ACTION" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-EXPECTED_OUTPUT_ACTION_NO_ARGUMENT=("./tp0: option requires an argument -- 'a'")
-
-function test31_parameter_action_no_argument(){
-  header "TEST31: no 'action' option parameters."
-
-  commands=("-a ")
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_ACTION_NO_ARGUMENT" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-EXPECTED_OUTPUT_VALID_PARAMETERS=()
 
 function test4_valid_parameters(){
+
+  EXPECTED_OUTPUT_VALID_PARAMETERS=()
+
+  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2.*/\1/g')
+
   header "TEST4: all options with correct parameters."
 
   commands=(
-  "-a encode -i ../tests/test1.bin -o ../tests/test1_out.bin"
-  "-a decode -i ../tests/test1_out.bin -o ../tests/test2.bin")
+  "-i ../test/loremipsum_${INPUT_FILE}.txt -o ../test/out_${INPUT_FILE}_1.txt"
+  "-i ../test/out_${INPUT_FILE}_1.txt -o ../test/out_${INPUT_FILE}_2.txt")
 
   for i in "${commands[@]}"
   do
@@ -303,22 +206,23 @@ function IO_validation_failed(){
   echo -e "$RED\0FAILED $DEFAULT $1"
 }
 
-TESTS_DIR="../tests";
+TESTS_DIR="../test_IO";
 mkdir $TESTS_DIR;
 
 function test5_IO_validation(){
   header "TEST5: input-output should be the same."
 
-  n=1;
-  nLimit=$((1024*1000));
+  # Running 'n*5' attempts for the input size 'n'
+  n=1024;
+  nLimit=$((1024*5));
 
   while [ $n -le $nLimit ]
   do
-     head -c $n </dev/urandom >$TESTS_DIR/in.bin;
+    head -c $n </dev/urandom >$TESTS_DIR/in.bin;
     $PROGRAM_NAME -a encode -i $TESTS_DIR/in.bin -o $TESTS_DIR/out.b64;
     $PROGRAM_NAME -a decode -i $TESTS_DIR/out.b64 -o $TESTS_DIR/out.bin;
 
-    diff_result="$(diff $TESTS_DIR/in.bin $TESTS_DIR/out.bin)";
+    diff_result="$(diff -q $TESTS_DIR/in.bin $TESTS_DIR/out.bin)";
 
     if [[ -z ${diff_result} ]]; then :;
       IO_validation_passed "n = $n";
@@ -345,7 +249,7 @@ function test51_IO_validation(){
 
   $PROGRAM_NAME -a encode -i $TESTS_DIR/leviathan.input -o $TESTS_DIR/leviathan_out.b64;
 
-  diff_result="$(diff $TESTS_DIR/leviathan_out.b64 $TESTS_DIR/leviathan_out_truth.b64)";
+  diff_result="$(diff $TESTS_DIR/leviathan_out.b64 ../test/dos.txt)";
 
   if [[ -z ${diff_result} ]]; then :;
     IO_validation_passed "No differences.";
@@ -356,65 +260,17 @@ function test51_IO_validation(){
 }
 
 function test52_IO_validation(){
-  header "TEST52: Encode letter 'M'."
+  header "TEST52: Encode array (Uno, Dos, Tres) with ${PROGRAM_NAME} and verify the correct output."
 
-  program_output="$(echo -n M | $PROGRAM_NAME)";
-  correct_output="TQ==";
-  diff_result="$(diff  <(echo "$program_output" ) <(echo "$correct_output"))";
+  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2.(.*)/\2/g')
 
-  if [[ -z ${diff_result} ]]; then :;
-    IO_validation_passed "No differences.";
-  else
-    IO_validation_failed "Differences: \n${diff_result}";
-    failedTests=$(($failedTests+1));
-  fi
-}
-
-function test53_IO_validation(){
-  header "TEST53: Encode 'Ma'."
-
-  program_output="$(echo -n Ma | $PROGRAM_NAME)";
-  correct_output="TWE=";
-  diff_result="$(diff  <(echo "$program_output" ) <(echo "$correct_output"))";
+  (echo "Uno"; echo "Dos"; echo "Tres") | $PROGRAM_NAME > $TESTS_DIR/out_test52.txt
+  diff_result="$(diff $TESTS_DIR/out_test52.txt $TESTS_DIR/$INPUT_FILE.txt)";
 
   if [[ -z ${diff_result} ]]; then :;
     IO_validation_passed "No differences.";
   else
     IO_validation_failed "Differences: \n${diff_result}";
-    failedTests=$(($failedTests+1));
-  fi
-}
-
-function test54_IO_validation(){
-  header "TEST54: Encode 'Man'."
-
-  program_output="$(echo -n Man | $PROGRAM_NAME)";
-  correct_output="TWFu";
-  diff_result="$(diff  <(echo "$program_output" ) <(echo "$correct_output"))";
-
-  if [[ -z ${diff_result} ]]; then :;
-    IO_validation_passed "No differences.";
-  else
-    IO_validation_failed "Differences: \n${diff_result}";
-    failedTests=$(($failedTests+1));
-  fi
-}
-
-function test55_IO_validation(){
-  header "TEST55: Encode and decode 'Man'."
-
-  program_output="$(echo Man | $PROGRAM_NAME | $PROGRAM_NAME -a decode)";
-  correct_output="Man";
-  diff_result="$(diff  <(echo "$program_output" ) <(echo "$correct_output"))";
-
-  if [[ -z ${diff_result} ]]; then :;
-    IO_validation_passed "No differences.";
-  else
-    IO_validation_failed "Difference------------------------------------------------------
-Test suite ended.
-------------------------------------------------------
-  All tests passed.
-s: \n${diff_result}";
     failedTests=$(($failedTests+1));
   fi
 }
@@ -422,10 +278,9 @@ s: \n${diff_result}";
 function test56_IO_validation(){
   header "TEST56: Check bit by bit."
 
-  program_output="$(echo -E xyz | $PROGRAM_NAME | $PROGRAM_NAME -a decode | od -t c)";
-  correct_output="0000000   x   y   z  \n
-0000004";
-  diff_result="$(diff  <(echo -E "$program_output" ) <(echo -E "$correct_output"))";
+  program_output="$(echo -n xyz | $PROGRAM_NAME | $PROGRAM_NAME -a decode | od -t c)";
+  correct_output="0000000    x   y   z 0000003";
+  diff_result="$(diff  <(echo $program_output ) <(echo $correct_output))";
 
   if [[ -z ${diff_result} ]]; then :;
     IO_validation_passed "No differences.";
@@ -443,7 +298,7 @@ function test57_IO_validation(){
   # 1024 bytes[base256] => (8190+2) bits => 1365 bytes[base64] + 2 bits
   # 1365 bytes[base64] + 2 bits + '==' =>  1366 bytes[base64]
   # floor(1366 bytes[base64] / 76 charEachLine) => 17 lines
-  correct_output_line_count="17";
+  correct_output_line_count="      17";
   diff_result_line_count="$(diff  <(echo "$program_output_line_count" ) <(echo "$correct_output_line_count"))";
 
   if [[ -z ${diff_result_line_count} ]]; then :;
@@ -456,7 +311,7 @@ function test57_IO_validation(){
   fi
 
   program_output_word_count="$(yes | head -c 1024 | $PROGRAM_NAME -a encode | $PROGRAM_NAME -a decode | wc -c)";
-  correct_output_word_count="1024";
+  correct_output_word_count="    1024";
   diff_result_word_count="$(diff  <(echo "$program_output_word_count" ) <(echo "$correct_output_word_count"))";
 
   if [[ -z ${diff_result_word_count} ]]; then :;
@@ -467,25 +322,6 @@ function test57_IO_validation(){
     Correct output:${correct_output_word_count}";
     failedTests=$(($failedTests+1));
   fi
-}
-
-EXPECTED_OUTPUT_INVALID_DECODE_INPUT=("ERROR: Character is not in Base64 Table.")
-function test58_IO_validation(){
-  header "TEST58: decoding input with chars not in B64 table should produce error."
-
-  n=1000;
-
-    head -c $n </dev/urandom >$TESTS_DIR/in_notvalid_b64.b64;
-    PROGRAM_OUTPUT=$($PROGRAM_NAME -a decode -i $TESTS_DIR/in_notvalid_b64.b64 -o $TESTS_DIR/out.bin 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_INVALID_DECODE_INPUT" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-    rm -f $TESTS_DIR/in_notvalid_b64.b64 $TESTS_DIR/out.bin
 }
 
 # ------------------------------------------------------------
@@ -539,25 +375,42 @@ function test7_decoding_execution_times(){
 }
 
 # ------------------------------------------------------------
-# Run the tests.
+# Run the tests. Program unix2dos
 # ------------------------------------------------------------
+
+# Program name to test.
+PROGRAM_NAME='./unix2dos'
+
 test1_parameter_input_inexistent_stream
-test11_parameter_input_no_argument
 test12_parameter_input_invalid_stream
+
 test2_parameter_output_stream
-test21_parameter_output_no_argument
-test3_parameter_action
-test31_parameter_action_no_argument
-# test4_valid_parameters
-# test5_IO_validation
+
+test4_valid_parameters
+
 # test51_IO_validation
-# test52_IO_validation
-# test53_IO_validation
-# test54_IO_validation
-# test55_IO_validation
+test52_IO_validation
+
+# ------------------------------------------------------------
+# Run the tests. Program dos2unix
+# ------------------------------------------------------------
+# Program name to test.
+PROGRAM_NAME='./dos2unix'
+
+test1_parameter_input_inexistent_stream
+test12_parameter_input_invalid_stream
+
+test2_parameter_output_stream
+
+test4_valid_parameters
+
+
+# ------------------------------------------------------------
+# Run encoding-decoding tests.
+# ------------------------------------------------------------
+# test5_IO_validation
 # test56_IO_validation
 # test57_IO_validation
-# test58_IO_validation
 # test6_encoding_execution_times
 # test7_decoding_execution_times
 
