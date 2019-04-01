@@ -30,6 +30,9 @@
 #
 # ------------------------------------------------------------
 
+# Test directory
+TEST_DIR="../test";
+
 # Failed tests counter.
 failedTests=0;
 
@@ -206,50 +209,48 @@ function IO_validation_failed(){
   echo -e "$RED\0FAILED $DEFAULT $1"
 }
 
-TESTS_DIR="../test_IO";
-mkdir $TESTS_DIR;
-
 function test5_IO_validation(){
   header "TEST5: input-output should be the same."
 
-  # Running 'n*5' attempts for the input size 'n'
-  n=1024;
-  nLimit=$((1024*5));
+  # Running 'nLimit' attempts for the input size 'n'
+  n=1;
+  nLimit=$((1024*n));
 
   while [ $n -le $nLimit ]
   do
-    head -c $n </dev/urandom >$TESTS_DIR/in.bin;
-    $PROGRAM_NAME -a encode -i $TESTS_DIR/in.bin -o $TESTS_DIR/out.b64;
-    $PROGRAM_NAME -a decode -i $TESTS_DIR/out.b64 -o $TESTS_DIR/out.bin;
+    head -c $n </dev/urandom >$TEST_DIR/input.$n.u;
 
-    diff_result="$(diff -q $TESTS_DIR/in.bin $TESTS_DIR/out.bin)";
+    $PROGRAM_ENC -i $TEST_DIR/input.$n.u -o $TEST_DIR/output.$n.d;
+    $PROGRAM_DEC -i $TEST_DIR/output.$n.d -o $TEST_DIR/output.$n.u;
+
+    diff_result="$(diff -q $TEST_DIR/input.$n.u $TEST_DIR/output.$n.u)";
 
     if [[ -z ${diff_result} ]]; then :;
       IO_validation_passed "n = $n";
     else
       IO_validation_failed "n = $n";
-      error_msg "in.bin";
-      cat $TESTS_DIR/in.bin | od -A x -t x1z -v;
-      error_msg "out.b64";
-      cat $TESTS_DIR/out.b64 | od -A x -t x1z -v;
-      error_msg "out.bin";
-      cat $TESTS_DIR/out.bin | od -A x -t x1z -v;
+      error_msg "input.$n.u";
+      cat $TEST_DIR/input.$n.u | od -A x -t x1z -v;
+      error_msg "output.$n.d";
+      cat $TEST_DIR/output.$n.d | od -A x -t x1z -v;
+      error_msg "output.$n.u";
+      cat $TEST_DIR/output.$n.u | od -A x -t x1z -v;
       failedTests=$(($failedTests+1));
       break;
     fi
 
     n=$(($n*2));
-
-    rm -f $TESTS_DIR/in.bin $TESTS_DIR/out.b64 $TESTS_DIR/out.bin
   done
+
+  rm -f $TEST_DIR/input.*.u $TEST_DIR/output.*.d $TEST_DIR/output.*.u
 }
 
 function test51_IO_validation(){
   header "TEST51: input known text with known encoding."
 
-  $PROGRAM_NAME -a encode -i $TESTS_DIR/leviathan.input -o $TESTS_DIR/leviathan_out.b64;
+  $PROGRAM_NAME -i $TEST_DIR/loremipsum_unix.txt -o $TEST_DIR/loremipsum_out.txt;
 
-  diff_result="$(diff $TESTS_DIR/leviathan_out.b64 ../test/dos.txt)";
+  diff_result="$(diff $TEST_DIR/loremipsum_out.txt $TEST_DIR/loremipsum_dos.txt)";
 
   if [[ -z ${diff_result} ]]; then :;
     IO_validation_passed "No differences.";
@@ -257,15 +258,19 @@ function test51_IO_validation(){
     IO_validation_failed "Differences: \n${diff_result}";
     failedTests=$(($failedTests+1));
   fi
+
+  rm -f $TEST_DIR/loremipsum_out.txt
 }
 
 function test52_IO_validation(){
-  header "TEST52: Encode array (Uno, Dos, Tres) with ${PROGRAM_NAME} and verify the correct output."
+  header "TEST52: verifying the correct output."
 
-  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2.(.*)/\2/g')
+  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2(.*).*/\1/g');
+  OUTPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2(.*).*/\2/g');
 
-  (echo "Uno"; echo "Dos"; echo "Tres") | $PROGRAM_NAME > $TESTS_DIR/out_test52.txt
-  diff_result="$(diff $TESTS_DIR/out_test52.txt $TESTS_DIR/$INPUT_FILE.txt)";
+  program_output="$($PROGRAM_NAME -i $TEST_DIR/${INPUT_FILE}.txt -o - | od -t c)";
+  correct_output="$(od -t c $TEST_DIR/${OUTPUT_FILE}.txt)";
+  diff_result="$(diff  <(echo $program_output ) <(echo $correct_output))";
 
   if [[ -z ${diff_result} ]]; then :;
     IO_validation_passed "No differences.";
@@ -278,8 +283,8 @@ function test52_IO_validation(){
 function test56_IO_validation(){
   header "TEST56: Check bit by bit."
 
-  program_output="$(echo -n xyz | $PROGRAM_NAME | $PROGRAM_NAME -a decode | od -t c)";
-  correct_output="0000000    x   y   z 0000003";
+  program_output="$((echo "Uno"; echo "Dos"; echo "Tres") | $PROGRAM_ENC | $PROGRAM_DEC | od -t c)";
+  correct_output="0000000 U n o \n D o s \n T r e s \n 0000015";
   diff_result="$(diff  <(echo $program_output ) <(echo $correct_output))";
 
   if [[ -z ${diff_result} ]]; then :;
@@ -293,12 +298,13 @@ function test56_IO_validation(){
 function test57_IO_validation(){
   header "TEST57: Check max line length and number of encoded bytes."
 
-  program_output_line_count="$(echo -n "$(yes | head -c 1024 | $PROGRAM_NAME -a encode)" | wc -l)";
+  program_output_line_count="$(echo -n "$(yes | head -c 1024 | $PROGRAM_ENC)" | wc -l)";
 
-  # 1024 bytes[base256] => (8190+2) bits => 1365 bytes[base64] + 2 bits
-  # 1365 bytes[base64] + 2 bits + '==' =>  1366 bytes[base64]
-  # floor(1366 bytes[base64] / 76 charEachLine) => 17 lines
-  correct_output_line_count="      17";
+  # 1024 bytes[unix] => 8192 bits
+  # charEachLine[unix] => 'y' + '\n'
+  # charEachLine[dos] => 'y' + '\n' + '\r'
+  # floor(1024 bytes[dos] /  charEachLine) => 511 lines
+  correct_output_line_count="511";
   diff_result_line_count="$(diff  <(echo "$program_output_line_count" ) <(echo "$correct_output_line_count"))";
 
   if [[ -z ${diff_result_line_count} ]]; then :;
@@ -310,8 +316,9 @@ function test57_IO_validation(){
     failedTests=$(($failedTests+1));
   fi
 
-  program_output_word_count="$(yes | head -c 1024 | $PROGRAM_NAME -a encode | $PROGRAM_NAME -a decode | wc -c)";
-  correct_output_word_count="    1024";
+  # Check encoded bytes
+  program_output_word_count="$(yes | head -c 1024 | $PROGRAM_ENC | $PROGRAM_DEC | wc -c)";
+  correct_output_word_count="1024";
   diff_result_word_count="$(diff  <(echo "$program_output_word_count" ) <(echo "$correct_output_word_count"))";
 
   if [[ -z ${diff_result_word_count} ]]; then :;
@@ -332,21 +339,22 @@ function test6_encoding_execution_times(){
 
   n=1;
   nLimit=$((1024*10000));
-  rm -f $TESTS_DIR/encodingTimes.txt
+  rm -f $TEST_DIR/encodingTimes.txt
 
   while [ $n -le $nLimit ]
   do
-    head -c $n </dev/urandom >$TESTS_DIR/in.bin;
+    head -c $n </dev/urandom >$TEST_DIR/in.$n.u;
     ts=$(date +%s%N);
-    $PROGRAM_NAME -a encode -i $TESTS_DIR/in.bin -o $TESTS_DIR/out.b64;
+    $PROGRAM_ENC -i $TEST_DIR/in.$n.u -o $TEST_DIR/out.$n.d;
     tt=$((($(date +%s%N) - $ts)/1000000));
 
     printf 'n: %-10d %10s %.2f [ms]\n' "$n" " " "$tt"
-    printf '%-10d %.2f\n' "$n" "$tt" >> $TESTS_DIR/encodingTimes.txt
+    printf '%-10d %.2f\n' "$n" "$tt" >> $TEST_DIR/encodingTimes.txt
 
+    rm -f $TEST_DIR/in.$n.u $TEST_DIR/out.$n.d
+    
     n=$((n*2));
 
-    rm -f $TESTS_DIR/in.bin $TESTS_DIR/out.b64 $TESTS_DIR/out.bin
   done
 }
 
@@ -355,22 +363,23 @@ function test7_decoding_execution_times(){
 
   n=1;
   nLimit=$((1024*10000));
-  rm -f $TESTS_DIR/decodingTimes.txt
+  rm -f $TEST_DIR/decodingTimes.txt
 
   while [ $n -le $nLimit ]
   do
-    head -c $n </dev/urandom >$TESTS_DIR/in.bin;
-    $PROGRAM_NAME -a encode -i $TESTS_DIR/in.bin -o $TESTS_DIR/out.b64;
+    head -c $n </dev/urandom >$TEST_DIR/in.$n.u;
+    $PROGRAM_ENC -i $TEST_DIR/in.$n.u -o $TEST_DIR/out.$n.d;
     ts=$(date +%s%N);
-    $PROGRAM_NAME -a decode -i $TESTS_DIR/out.b64 -o $TESTS_DIR/out.bin;
+    $PROGRAM_DEC -i $TEST_DIR/out.$n.d -o $TEST_DIR/out.$n.u;
     tt=$((($(date +%s%N) - $ts)/1000000));
 
     printf 'n: %-10d %10s %.2f [ms]\n' "$n" " " "$tt"
-    printf '%-10d %.2f\n' "$n" "$tt" >> $TESTS_DIR/decodingTimes.txt
+    printf '%-10d %.2f\n' "$n" "$tt" >> $TEST_DIR/decodingTimes.txt
+
+    rm -f $TEST_DIR/in.$n.u $TEST_DIR/out.$n.d $TEST_DIR/out.$n.u
 
     n=$((n*2));
 
-    rm -f $TESTS_DIR/in.bin $TESTS_DIR/out.b64 $TESTS_DIR/out.bin
   done
 }
 
@@ -379,7 +388,7 @@ function test7_decoding_execution_times(){
 # ------------------------------------------------------------
 
 # Program name to test.
-PROGRAM_NAME='./unix2dos'
+PROGRAM_NAME='../test/unix2dos.sh'
 
 test1_parameter_input_inexistent_stream
 test12_parameter_input_invalid_stream
@@ -388,14 +397,14 @@ test2_parameter_output_stream
 
 test4_valid_parameters
 
-# test51_IO_validation
+test51_IO_validation
 test52_IO_validation
 
 # ------------------------------------------------------------
 # Run the tests. Program dos2unix
 # ------------------------------------------------------------
 # Program name to test.
-PROGRAM_NAME='./dos2unix'
+PROGRAM_NAME='../test/dos2unix.sh'
 
 test1_parameter_input_inexistent_stream
 test12_parameter_input_invalid_stream
@@ -404,15 +413,19 @@ test2_parameter_output_stream
 
 test4_valid_parameters
 
+test52_IO_validation
 
 # ------------------------------------------------------------
 # Run encoding-decoding tests.
 # ------------------------------------------------------------
-# test5_IO_validation
-# test56_IO_validation
-# test57_IO_validation
-# test6_encoding_execution_times
-# test7_decoding_execution_times
+PROGRAM_ENC='../test/unix2dos.sh'
+PROGRAM_DEC='../test/dos2unix.sh'
+
+test5_IO_validation
+test56_IO_validation
+test57_IO_validation
+test6_encoding_execution_times
+test7_decoding_execution_times
 
 header "Test suite ended."
 
