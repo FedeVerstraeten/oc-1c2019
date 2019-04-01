@@ -55,3 +55,7 @@ dkms.conf
 
 # Empty directory
 gxemul-script/guestFS/*
+
+# Misc files
+tp0/test/encodingTimes.txt
+tp0/test/decodingTimes.txt
