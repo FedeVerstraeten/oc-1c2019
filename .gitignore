@@ -35,8 +35,8 @@
 *.i*86
 *.x86_64
 *.hex
-tp0/src/tp0
-
+tp0/src/unix2dos
+tp0/src/dos2unix
 
 # Debug files
 *.dSYM/
@@ -55,3 +55,8 @@ dkms.conf
 
 # Empty directory
 gxemul-script/guestFS/*
+
+# Text output files
+tp0/test/encodingTimes.txt
+tp0/test/decodingTimes.txt
+tp0/test/out_test*.txt
