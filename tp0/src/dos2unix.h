@@ -18,18 +18,18 @@
     is strictly prohibited.
 --------------------------------------------------------------
 
-DOS to Unix converter  definitions and declarations.
+DOS to Unix converter definitions and declarations.
 
 ----------------------------------------------------------- */
 #ifndef DOS2UNIX__H
 #define DOS2UNIX__H
 
 #include <stdio.h>
-#include "common.h"
+/*#include "common.h"*/
 #include "messages.h"
 
-//#define ANY_CONSTANT 10
-
-outputCode dos2unix(params_t *params);
+/* outputCode dos2unix(params_t *params);
+*/
+int dos2unix(int infd, int outfd);
 
 #endif

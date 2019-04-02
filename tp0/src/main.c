@@ -21,6 +21,11 @@
 Main program. Entry point.
 
 ----------------------------------------------------------- */
+
+/*Necessary to avoid the warning: implicit declaration 
+of function ‘fileno’. This must be at the beginning.*/
+#define _POSIX_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,25 +41,31 @@ int main(int argc, char **argv)
 
   /* We parse the command line and check for errors. */
   outputCode cmdParsingState = parseCmdline(argc, argv, &params);
+
   if (cmdParsingState == outERROR)
   {
     exit(EXIT_FAILURE);
   }
 
-  outputCode transformationState;
-  if (strcmp(params.action, ENCODE_STR_TOKEN) == 0)
-  {
-    //transformationState = unix2dos(&params);
-  }
-  else
-  {
-    //transformationState = dos2unix(&params);
-  }
-  if (transformationState == outERROR)
-  {
+  /*Open the files descriptor*/
+  int codecState=1;
+  int infd = fileno(params.inputStream);
+  int outfd = fileno(params.outputStream);
+
+
+#ifdef UNIX2DOS_ENC
+  codecState = unix2dos(infd, outfd);
+#endif
+
+#ifdef DOS2UNIX_ENC
+  codecState = dos2unix(infd, outfd);
+#endif
+
+  if (codecState != 0) {
+    fprintf(stderr, "%s", errmsg[codecState]);
     exit(EXIT_FAILURE);
   }
-
+  
   /* Close and free what is left. */
   fclose(params.inputStream);
   fclose(params.outputStream);

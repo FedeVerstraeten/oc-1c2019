@@ -23,8 +23,10 @@ DOS to Unix converter implementation.
 ----------------------------------------------------------- */
 #include "dos2unix.h"
 
-outputCode dos2unix(params_t *params)
+/* outputCode dos2unix(params_t *params) 
+*/
+int dos2unix(int infd, int outfd)
 {
 
-  return outERROR;
+  return 0;
 }

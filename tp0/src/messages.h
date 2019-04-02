@@ -47,4 +47,19 @@ Program's common messages.
 #define ERROR_INPUT_STREAM_READING_MSG "Input error when reading stream.\n"
 #endif
 
+/* These values must correspond with 'errmsg' array. */
+#ifndef ERROR_NUMBER_OUTPUT_STREAM_WRITING_MSG
+#define ERROR_NUMBER_OUTPUT_STREAM_WRITING_MSG 1
+#endif
+
+#ifndef ERROR_NUMBER_INPUT_STREAM_READING_MSG
+#define ERROR_NUMBER_INPUT_STREAM_READING_MSG 2
+#endif
+
+/* Error messages indices:
+    1 - ERROR_OUTPUT_STREAM_WRITING_MSG
+    2 - ERROR_INPUT_STREAM_READING_MSG
+*/
+extern const char *errmsg[];
+
 #endif

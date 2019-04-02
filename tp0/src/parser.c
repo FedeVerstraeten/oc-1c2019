@@ -29,7 +29,6 @@ struct option cmdOptions[] = {{"version", no_argument, NULL, 'V'},
                               {"help", no_argument, NULL, 'h'},
                               {"input", required_argument, NULL, 'i'},
                               {"output", required_argument, NULL, 'o'},
-                              {"action", required_argument, NULL, 'a'},
                               {0, 0, 0, 0}};
 
 void optVersion(void)
@@ -55,11 +54,10 @@ void optHelp(char *arg)
   fprintf(stderr, "-h, --help\tPrint this information.\n");
   fprintf(stderr, "-i, --input\tLocation of the input file.\n");
   fprintf(stderr, "-o, --output\tLocation of the output file.\n");
-  fprintf(stderr,
-          "-a, --action\tProgram action: encode (default) or decode.\n");
   fprintf(stderr, "Examples:\n");
-  fprintf(stderr, "  %s -a encode -i ~/input -o ~/output\n", arg);
-  fprintf(stderr, "  %s -a decode\n", arg);
+  fprintf(stderr, "  ./unix2dos -i ~/input -o ~/output\n");
+  fprintf(stderr, "  ./unix2dos\n");
+  fprintf(stderr, "  ./dos2unix -i - -o -\n");
 
   exit(EXIT_SUCCESS);
 }
@@ -132,31 +130,6 @@ outputCode optOutput(char *arg, params_t *params)
   return outOK;
 }
 
-outputCode optAction(char *arg, params_t *params)
-{
-  if (arg == NULL)
-  {
-    fprintf(stderr, ERROR_ACTION_INVALID_ARGUMENT);
-    return outERROR;
-  }
-
-  if (strcmp(arg, ENCODE_STR_TOKEN) == 0)
-  {
-    params->action = ENCODE_STR_TOKEN;
-  }
-  else if (strcmp(arg, DECODE_STR_TOKEN) == 0)
-  {
-    params->action = DECODE_STR_TOKEN;
-  }
-  else
-  {
-    fprintf(stderr, ERROR_ACTION_INVALID_ARGUMENT);
-    return outERROR;
-  }
-
-  return outOK;
-}
-
 outputCode parseCmdline(int argc, char **argv, params_t *params)
 {
   int indexptr = 0;
@@ -166,13 +139,12 @@ outputCode parseCmdline(int argc, char **argv, params_t *params)
   char *programName = argv[0];
 
   /* Set the default values. */
-  params->action = ENCODE_STR_TOKEN;
   params->inputStream = stdin;
   params->outputStream = stdout;
 
   /* 'version' and 'help' have no arguments. The rest, do
    * have, and are mandatory.*/
-  char *shortOpts = "Vhi:o:a:";
+  char *shortOpts = "Vhi:o:";
 
   while ((optCode =
               getopt_long(argc, argv, shortOpts, cmdOptions, &indexptr)) != -1)
@@ -190,9 +162,6 @@ outputCode parseCmdline(int argc, char **argv, params_t *params)
         break;
       case 'o':
         optOutCode = optOutput(optarg, params);
-        break;
-      case 'a':
-        optOutCode = optAction(optarg, params);
         break;
       case '?':
         /* getopt_long already printed an error message. */

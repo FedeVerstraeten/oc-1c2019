@@ -178,8 +178,8 @@ function test4_valid_parameters(){
   header "TEST4: all options with correct parameters."
 
   commands=(
-  "-i ../test/loremipsum_${INPUT_FILE}.txt -o ../test/out_${INPUT_FILE}_1.txt"
-  "-i ../test/out_${INPUT_FILE}_1.txt -o ../test/out_${INPUT_FILE}_2.txt")
+  "-i $TEST_DIR/loremipsum_${INPUT_FILE}.txt -o $TEST_DIR/out_test4_${INPUT_FILE}_1.txt"
+  "-i $TEST_DIR/out_test4_${INPUT_FILE}_1.txt -o $TEST_DIR/out_test4_${INPUT_FILE}_2.txt")
 
   for i in "${commands[@]}"
   do
@@ -388,7 +388,7 @@ function test7_decoding_execution_times(){
 # ------------------------------------------------------------
 
 # Program name to test.
-PROGRAM_NAME='../test/unix2dos.sh'
+PROGRAM_NAME='./unix2dos'
 
 test1_parameter_input_inexistent_stream
 test12_parameter_input_invalid_stream
@@ -404,7 +404,7 @@ test52_IO_validation
 # Run the tests. Program dos2unix
 # ------------------------------------------------------------
 # Program name to test.
-PROGRAM_NAME='../test/dos2unix.sh'
+PROGRAM_NAME='./dos2unix'
 
 test1_parameter_input_inexistent_stream
 test12_parameter_input_invalid_stream
@@ -418,8 +418,8 @@ test52_IO_validation
 # ------------------------------------------------------------
 # Run encoding-decoding tests.
 # ------------------------------------------------------------
-PROGRAM_ENC='../test/unix2dos.sh'
-PROGRAM_DEC='../test/dos2unix.sh'
+PROGRAM_ENC='./unix2dos'
+PROGRAM_DEC='./dos2unix'
 
 test5_IO_validation
 test56_IO_validation

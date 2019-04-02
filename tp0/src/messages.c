@@ -18,29 +18,15 @@
     is strictly prohibited.
 --------------------------------------------------------------
 
-CLA parser definitions and declarations.
+Error messages definitions.
 
 ----------------------------------------------------------- */
-#ifndef PARSER__H
-#define PARSER__H
-
-#include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "common.h"
 #include "messages.h"
 
-#ifndef STD_STREAM_TOKEN
-#define STD_STREAM_TOKEN "-"
-#endif
+/* Error messages indices:
+    1 - ERROR_OUTPUT_STREAM_WRITING_MSG
+    2 - ERROR_INPUT_STREAM_READING_MSG
+*/
 
-extern struct option cmdOptions[];
-
-outputCode parseCmdline(int argc, char **argv, params_t *params);
-outputCode optOutput(char *arg, params_t *params);
-outputCode optInput(char *arg, params_t *params);
-void optHelp(char *arg);
-void optVersion(void);
-
-#endif
+const char *errmsg[] = {0, ERROR_OUTPUT_STREAM_WRITING_MSG,
+                        ERROR_INPUT_STREAM_READING_MSG};
