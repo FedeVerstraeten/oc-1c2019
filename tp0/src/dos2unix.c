@@ -28,5 +28,5 @@ DOS to Unix converter implementation.
 int dos2unix(int infd, int outfd)
 {
 
-  return 0;
+    return 0;
 }
