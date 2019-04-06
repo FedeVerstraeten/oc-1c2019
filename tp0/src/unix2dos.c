@@ -22,33 +22,32 @@ Unix to DOS converter implementation.
 
 ----------------------------------------------------------- */
 #include "unix2dos.h"
-#include <unistd.h>
-
-#define LF 10
-#define CR 13
 
 /*outputCode unix2dos(params_t *params);
 */
 
 int unix2dos(int infd, int outfd){
     unsigned char buffer[1] = {0};
-    int p = CR;
-    ssize_t byte_read = 0;
-    byte_read = read(infd, &buffer[0], 1);
-    if (byte_read < 1) return byte_read;
+    int control_character = CR;
+    ssize_t a_byte= 0; 
 
-    while (byte_read > 0){
+    a_byte = read(infd, &buffer[0], 1);
+    if (a_byte < 1) return READ_ERROR_FILE;
+
+    while (a_byte > 0){
 	
 	if (buffer[0] == LF){
-	    byte_read = write(outfd, &p, 1);
-            byte_read = write(outfd, &buffer[0], 1);
+	    a_byte = write(outfd, &control_character, 1);
+            a_byte = write(outfd, &buffer[0], 1);
 	}else{
-	    byte_read = write(outfd, &buffer[0], 1);
+	    a_byte = write(outfd, &buffer[0], 1);
 	}
-	byte_read = read(infd, &buffer[0], 1);
-        if (byte_read < 1) break;
+	a_byte = read(infd, &buffer[0], 1);
+        if (a_byte < 1){
+	    break;
+        }
     }
+    if (a_byte == -1) return READ_ERROR_FILE;
     
-    if (byte_read > 0) byte_read = write(outfd, &buffer[1], 1);
-    return byte_read;
+    return READ_OK;
 }

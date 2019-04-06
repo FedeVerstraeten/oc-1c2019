@@ -27,7 +27,11 @@ Unis to DOS converter definitions and declarations.
 #include <stdio.h>
 /*#include "common.h"*/
 #include "messages.h"
+#include <unistd.h>
 
+#define LF 10
+#define CR 13
+#define READ_OK 0
 /*outputCode unix2dos(params_t *params);
 */
 int unix2dos(int infd, int outfd);

@@ -56,9 +56,14 @@ Program's common messages.
 #define ERROR_NUMBER_INPUT_STREAM_READING_MSG 2
 #endif
 
+#ifndef READ_ERROR_FILE
+#define READ_ERROR_FILE 3
+#endif
+
 /* Error messages indices:
     1 - ERROR_OUTPUT_STREAM_WRITING_MSG
     2 - ERROR_INPUT_STREAM_READING_MSG
+    3 - READ_ERROR_FILE
 */
 extern const char *errmsg[];
 
