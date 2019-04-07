@@ -23,9 +23,6 @@ Unix to DOS converter implementation.
 ----------------------------------------------------------- */
 #include "unix2dos.h"
 
-/*outputCode unix2dos(params_t *params);
-*/
-
 int unix2dos(int infd, int outfd){
     unsigned char buffer[1] = {0};
     int control_character = CR;
