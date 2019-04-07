@@ -29,7 +29,7 @@ int unix2dos(int infd, int outfd){
     ssize_t a_byte= 0; 
 
     a_byte = read(infd, &buffer[0], 1);
-    if (a_byte < 1) return ERROR_READ_FILE;
+    if (a_byte < 1) return ERROR_NUMBER_READ_FILE;
 
     while (a_byte > 0){
 	
@@ -44,7 +44,7 @@ int unix2dos(int infd, int outfd){
 	    break;
         }
     }
-    if (a_byte == -1) return ERROR_READ_FILE;
+    if (a_byte == -1) return ERROR_NUMBER_READ_FILE;
     
     return READ_OK;
 }
