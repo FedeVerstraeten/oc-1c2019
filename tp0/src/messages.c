@@ -34,3 +34,4 @@ const char *errmsg[] = {0, ERROR_OUTPUT_STREAM_WRITING_MSG,
                           ERROR_INPUT_STREAM_READING_MSG, 
                           ERROR_READ_FILE_MSG,
                       };
+
