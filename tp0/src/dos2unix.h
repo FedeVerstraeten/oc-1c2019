@@ -25,11 +25,8 @@ DOS to Unix converter definitions and declarations.
 #define DOS2UNIX__H
 
 #include <stdio.h>
-/*#include "common.h"*/
 #include "messages.h"
 
-/* outputCode dos2unix(params_t *params);
-*/
 int dos2unix(int infd, int outfd);
 
 #endif
