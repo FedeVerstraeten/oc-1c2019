@@ -27,28 +27,27 @@ DOS to Unix converter implementation.
 #define LF 10
 #define CR 13
 
-/* outputCode dos2unix(params_t *params)
-*/
 int dos2unix(int infd, int outfd) {
   unsigned char buffer[2] = {0, 0};
   ssize_t byte_count = 0;
 
   byte_count = read(infd, &buffer[0], 1);
-  if (byte_count < 1) return byte_count;
 
-  do {
+  while (byte_count > 0) {
     byte_count = read(infd, &buffer[1], 1);
-    if (byte_count < 1) break;
+    if (byte_count < 1) {
+      byte_count = write(outfd, &buffer[0], 1);
+      return 0;
+    }
 
     if (buffer[0] == CR && buffer[1] == LF) {
       byte_count = write(outfd, &buffer[1], 1);
       byte_count = read(infd, &buffer[0], 1);
-      continue;
     } else {
       byte_count = write(outfd, &buffer[0], 1);
+      buffer[0] = buffer[1];
     }
-    buffer[0] = buffer[1];
-  } while (byte_count > 0);
+  }
 
   if (byte_count > 0) byte_count = write(outfd, &buffer[1], 1);
   return byte_count;
