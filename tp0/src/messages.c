@@ -26,7 +26,11 @@ Error messages definitions.
 /* Error messages indices:
     1 - ERROR_OUTPUT_STREAM_WRITING_MSG
     2 - ERROR_INPUT_STREAM_READING_MSG
+    3 - ERROR_READ_FILE_MSG
+
 */
 
-const char *errmsg[] = {0, ERROR_OUTPUT_STREAM_WRITING_MSG,
-                        ERROR_INPUT_STREAM_READING_MSG};
+const char *errmsg[] = {0, ERROR_OUTPUT_STREAM_WRITING_MSG, 
+                          ERROR_INPUT_STREAM_READING_MSG, 
+                          ERROR_READ_FILE_MSG,
+                      };

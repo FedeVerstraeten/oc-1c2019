@@ -41,13 +41,17 @@ Program's common messages.
 #define ERROR_ACTION_INVALID_ARGUMENT "ERROR: Invalid action argument.\n"
 #endif
 #ifndef ERROR_OUTPUT_STREAM_WRITING_MSG
-#define ERROR_OUTPUT_STREAM_WRITING_MSG "Output error when writing stream.\n"
+#define ERROR_OUTPUT_STREAM_WRITING_MSG "ERROR: Output error when writing stream.\n"
 #endif
 #ifndef ERROR_INPUT_STREAM_READING_MSG
-#define ERROR_INPUT_STREAM_READING_MSG "Input error when reading stream.\n"
+#define ERROR_INPUT_STREAM_READING_MSG "ERROR: Input error when reading stream.\n"
 #endif
 
-/* These values must correspond with 'errmsg' array. */
+#ifndef ERROR_READ_FILE_MSG
+#define ERROR_READ_FILE_MSG "ERROR: Program unix2dos can't read file.\n"
+#endif
+
+/* These values must correspond with index 'errmsg' array. */
 #ifndef ERROR_NUMBER_OUTPUT_STREAM_WRITING_MSG
 #define ERROR_NUMBER_OUTPUT_STREAM_WRITING_MSG 1
 #endif
@@ -56,9 +60,14 @@ Program's common messages.
 #define ERROR_NUMBER_INPUT_STREAM_READING_MSG 2
 #endif
 
+#ifndef ERROR_READ_FILE
+#define ERROR_NUMBER_READ_FILE 3
+#endif
+
 /* Error messages indices:
     1 - ERROR_OUTPUT_STREAM_WRITING_MSG
     2 - ERROR_INPUT_STREAM_READING_MSG
+    3 - ERROR_READ_FILE_MSG
 */
 extern const char *errmsg[];
 
