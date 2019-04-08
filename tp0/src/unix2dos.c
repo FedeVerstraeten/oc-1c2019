@@ -21,30 +21,28 @@
 Unix to DOS converter implementation.
 
 ----------------------------------------------------------- */
+#include <unistd.h>
 #include "unix2dos.h"
 
-int unix2dos(int infd, int outfd){
-    unsigned char buffer[1] = {0};
-    int control_character = CR;
-    ssize_t a_byte= 0; 
+int unix2dos(int infd, int outfd) {
+  unsigned char buffer[1] = {0};
+  unsigned char control_character = CR;
+  ssize_t a_byte = 0;
 
-    a_byte = read(infd, &buffer[0], 1);
-    if (a_byte < 1) return ERROR_NUMBER_READ_FILE;
+  a_byte = read(infd, &buffer[0], 1);
+  if (a_byte < 1) return ERROR_NUMBER_READ_FILE;
 
-    while (a_byte > 0){
-	
-	if (buffer[0] == LF){
-	    a_byte = write(outfd, &control_character, 1);
-            a_byte = write(outfd, &buffer[0], 1);
-	}else{
-	    a_byte = write(outfd, &buffer[0], 1);
-	}
-	a_byte = read(infd, &buffer[0], 1);
-        if (a_byte < 1){
-	    break;
-        }
+  while (a_byte > 0) {
+    if (buffer[0] == LF) {
+      a_byte = write(outfd, &control_character, 1);
+      a_byte = write(outfd, &buffer[0], 1);
+    } else {
+      a_byte = write(outfd, &buffer[0], 1);
     }
-    if (a_byte == -1) return ERROR_NUMBER_READ_FILE;
-    
-    return READ_OK;
+    a_byte = read(infd, &buffer[0], 1);
+    if (a_byte < 1) break;
+  }
+
+  if (a_byte == -1) return ERROR_NUMBER_READ_FILE;
+  return READ_OK;
 }

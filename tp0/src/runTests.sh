@@ -75,7 +75,7 @@ function error_msg() {
 # Input parameters tests.
 # ------------------------------------------------------------
 
-# Define the expected outputs of each of the test cases with 
+# Define the expected outputs of each of the test cases with
 # its associated test functions.
 
 function test1_parameter_input_inexistent_stream(){
@@ -352,7 +352,7 @@ function test6_encoding_execution_times(){
     printf '%-10d %.2f\n' "$n" "$tt" >> $TEST_DIR/encodingTimes.txt
 
     rm -f $TEST_DIR/in.$n.u $TEST_DIR/out.$n.d
-    
+
     n=$((n*2));
 
   done
