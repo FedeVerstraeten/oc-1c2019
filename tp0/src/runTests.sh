@@ -140,7 +140,7 @@ function test2_parameter_output_stream(){
 
   EXPECTED_OUTPUT_INVALID_OUTPUT_STREAM=("ERROR: Invalid output stream.")
 
-  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2.*/\1/g')
+  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2.*/\1/g' -X)
 
   header "TEST2: invalid 'output' stream."
 
@@ -173,7 +173,7 @@ function test4_valid_parameters(){
 
   EXPECTED_OUTPUT_VALID_PARAMETERS=()
 
-  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2.*/\1/g')
+  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2.*/\1/g' -X)
 
   header "TEST4: all options with correct parameters."
 
@@ -265,8 +265,8 @@ function test51_IO_validation(){
 function test52_IO_validation(){
   header "TEST52: verifying the correct output."
 
-  INPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2(.*).*/\1/g');
-  OUTPUT_FILE=$(echo $PROGRAM_NAME | sed -r 's/..(.*)2(.*).*/\2/g');
+  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X);
+  OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X);
 
   program_output="$($PROGRAM_NAME -i $TEST_DIR/${INPUT_FILE}.txt -o - | od -t c)";
   correct_output="$(od -t c $TEST_DIR/${OUTPUT_FILE}.txt)";
@@ -298,7 +298,7 @@ function test56_IO_validation(){
 function test57_IO_validation(){
   header "TEST57: Check max line length and number of encoded bytes."
 
-  program_output_line_count="$(echo -n "$(yes | head -c 1024 | $PROGRAM_ENC)" | wc -l)";
+  program_output_line_count="$(echo -n "$(yes | head -c 1024 | $PROGRAM_ENC)" | wc -l | tr -d ' ')";
 
   # 1024 bytes[unix] => 8192 bits
   # charEachLine[unix] => 'y' + '\n'
@@ -317,7 +317,7 @@ function test57_IO_validation(){
   fi
 
   # Check encoded bytes
-  program_output_word_count="$(yes | head -c 1024 | $PROGRAM_ENC | $PROGRAM_DEC | wc -c)";
+  program_output_word_count="$(yes | head -c 1024 | $PROGRAM_ENC | $PROGRAM_DEC | wc -c | tr -d ' ')";
   correct_output_word_count="1024";
   diff_result_word_count="$(diff  <(echo "$program_output_word_count" ) <(echo "$correct_output_word_count"))";
 
