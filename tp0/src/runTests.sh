@@ -169,17 +169,17 @@ function test2_parameter_output_stream(){
 }
 
 
-function test4_valid_parameters(){
+function test3_valid_parameters(){
 
   EXPECTED_OUTPUT_VALID_PARAMETERS=()
 
   INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2.*/\1/g' -X)
 
-  header "TEST4: all options with correct parameters."
+  header "TEST3: all options with correct parameters."
 
   commands=(
-  "-i $TEST_DIR/loremipsum_${INPUT_FILE}.txt -o $TEST_DIR/out_test4_${INPUT_FILE}_1.txt"
-  "-i $TEST_DIR/out_test4_${INPUT_FILE}_1.txt -o $TEST_DIR/out_test4_${INPUT_FILE}_2.txt")
+  "-i $TEST_DIR/loremipsum_${INPUT_FILE}.txt -o $TEST_DIR/out_test3_${INPUT_FILE}_1.txt"
+  "-i $TEST_DIR/out_test3_${INPUT_FILE}_1.txt -o $TEST_DIR/out_test3_${INPUT_FILE}_2.txt")
 
   for i in "${commands[@]}"
   do
@@ -209,12 +209,53 @@ function IO_validation_failed(){
   echo -e "$RED\0FAILED $DEFAULT $1"
 }
 
-function test5_IO_validation(){
-  header "TEST5: input-output should be the same."
+function test41_IO_validation(){
+  header "TEST41: input known text with known encoding."
+
+  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X)
+  OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X)
+
+  $PROGRAM_NAME -i $TEST_DIR/loremipsum_${INPUT_FILE}.txt -o $TEST_DIR/loremipsum_out.txt;
+
+  diff_result="$(diff $TEST_DIR/loremipsum_out.txt $TEST_DIR/loremipsum_${OUTPUT_FILE}.txt)";
+
+  if [[ -z ${diff_result} ]]; then :;
+    IO_validation_passed "No differences.";
+  else
+    IO_validation_failed "Differences: \n${diff_result}";
+    failedTests=$(($failedTests+1));
+  fi
+
+  rm -f $TEST_DIR/loremipsum_out.txt
+}
+
+function test42_IO_validation(){
+  header "TEST42: verifying the correct output."
+
+  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X);
+  OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X);
+
+  program_output="$($PROGRAM_NAME -i $TEST_DIR/${INPUT_FILE}.txt -o - | od -t c)";
+  correct_output="$(od -t c $TEST_DIR/${OUTPUT_FILE}.txt)";
+  diff_result="$(diff  <(echo $program_output ) <(echo $correct_output))";
+
+  if [[ -z ${diff_result} ]]; then :;
+    IO_validation_passed "No differences.";
+  else
+    IO_validation_failed "Differences: \n${diff_result}";
+    failedTests=$(($failedTests+1));
+  fi
+}
+
+function test43_IO_validation(){
+  header "TEST43: input-output should be the same."
 
   # Running 'nLimit' attempts for the input size 'n'
   n=1;
   nLimit=$((1024*n));
+
+  msg_testing "$PROGRAM_ENC -i $TEST_DIR/input.n.u -o $TEST_DIR/output.n.d"
+  msg_testing "$PROGRAM_DEC -i $TEST_DIR/output.n.d -o $TEST_DIR/output.n.u"
 
   while [ $n -le $nLimit ]
   do
@@ -245,44 +286,10 @@ function test5_IO_validation(){
   rm -f $TEST_DIR/input.*.u $TEST_DIR/output.*.d $TEST_DIR/output.*.u
 }
 
-function test51_IO_validation(){
-  header "TEST51: input known text with known encoding."
+function test44_IO_validation(){
+  header "TEST44: Check bit by bit."
 
-  $PROGRAM_NAME -i $TEST_DIR/loremipsum_unix.txt -o $TEST_DIR/loremipsum_out.txt;
-
-  diff_result="$(diff $TEST_DIR/loremipsum_out.txt $TEST_DIR/loremipsum_dos.txt)";
-
-  if [[ -z ${diff_result} ]]; then :;
-    IO_validation_passed "No differences.";
-  else
-    IO_validation_failed "Differences: \n${diff_result}";
-    failedTests=$(($failedTests+1));
-  fi
-
-  rm -f $TEST_DIR/loremipsum_out.txt
-}
-
-function test52_IO_validation(){
-  header "TEST52: verifying the correct output."
-
-  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X);
-  OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X);
-
-  program_output="$($PROGRAM_NAME -i $TEST_DIR/${INPUT_FILE}.txt -o - | od -t c)";
-  correct_output="$(od -t c $TEST_DIR/${OUTPUT_FILE}.txt)";
-  diff_result="$(diff  <(echo $program_output ) <(echo $correct_output))";
-
-  if [[ -z ${diff_result} ]]; then :;
-    IO_validation_passed "No differences.";
-  else
-    IO_validation_failed "Differences: \n${diff_result}";
-    failedTests=$(($failedTests+1));
-  fi
-}
-
-function test56_IO_validation(){
-  header "TEST56: Check bit by bit."
-
+  msg_testing "(echo \"Uno\"; echo \"Dos\"; echo \"Tres\") | $PROGRAM_ENC | $PROGRAM_DEC | od -t c"
   program_output="$((echo "Uno"; echo "Dos"; echo "Tres") | $PROGRAM_ENC | $PROGRAM_DEC | od -t c)";
   correct_output="0000000 U n o \n D o s \n T r e s \n 0000015";
   diff_result="$(diff  <(echo $program_output ) <(echo $correct_output))";
@@ -295,8 +302,8 @@ function test56_IO_validation(){
   fi
 }
 
-function test57_IO_validation(){
-  header "TEST57: Check max line length and number of encoded bytes."
+function test45_IO_validation(){
+  header "TEST45: Check max line length and number of encoded bytes."
 
   program_output_line_count="$(echo -n "$(yes | head -c 1024 | $PROGRAM_ENC)" | wc -l | tr -d ' ')";
 
@@ -334,8 +341,8 @@ function test57_IO_validation(){
 # ------------------------------------------------------------
 # Encoding-Decoding execution times tests.
 # ------------------------------------------------------------
-function test6_encoding_execution_times(){
-  header "TEST6: encoding execution times."
+function test5_encoding_execution_times(){
+  header "TEST5: encoding execution times."
 
   n=1;
   nLimit=$((1024*10000));
@@ -358,8 +365,8 @@ function test6_encoding_execution_times(){
   done
 }
 
-function test7_decoding_execution_times(){
-  header "TEST7: decoding execution times."
+function test6_decoding_execution_times(){
+  header "TEST6: decoding execution times."
 
   n=1;
   nLimit=$((1024*10000));
@@ -392,28 +399,24 @@ PROGRAM_NAME='./unix2dos'
 
 test1_parameter_input_inexistent_stream
 test12_parameter_input_invalid_stream
-
 test2_parameter_output_stream
-
-test4_valid_parameters
-
-test51_IO_validation
-test52_IO_validation
+test3_valid_parameters
+test41_IO_validation
+test42_IO_validation
 
 # ------------------------------------------------------------
 # Run the tests. Program dos2unix
 # ------------------------------------------------------------
+
 # Program name to test.
 PROGRAM_NAME='./dos2unix'
 
 test1_parameter_input_inexistent_stream
 test12_parameter_input_invalid_stream
-
 test2_parameter_output_stream
-
-test4_valid_parameters
-
-test52_IO_validation
+test3_valid_parameters
+test41_IO_validation
+test42_IO_validation
 
 # ------------------------------------------------------------
 # Run encoding-decoding tests.
@@ -421,11 +424,12 @@ test52_IO_validation
 PROGRAM_ENC='./unix2dos'
 PROGRAM_DEC='./dos2unix'
 
-test5_IO_validation
-test56_IO_validation
-test57_IO_validation
-test6_encoding_execution_times
-test7_decoding_execution_times
+test43_IO_validation
+test44_IO_validation
+test45_IO_validation
+
+test5_encoding_execution_times
+test6_decoding_execution_times
 
 header "Test suite ended."
 
