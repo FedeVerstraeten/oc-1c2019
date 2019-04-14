@@ -60,3 +60,5 @@ gxemul-script/guestFS/*
 tp0/test/encodingTimes.txt
 tp0/test/decodingTimes.txt
 tp0/test/out_test*.txt
+tp0/test/encodingComp.txt
+tp0/test/decodingComp.txt
