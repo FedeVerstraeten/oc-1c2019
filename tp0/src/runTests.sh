@@ -210,7 +210,7 @@ function IO_validation_failed(){
 }
 
 function test41_IO_validation(){
-  header "TEST41: input known text with known encoding."
+  header "TEST41: input-text known with known encoding using $PROGRAM_NAME."
 
   INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X)
   OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X)
@@ -230,7 +230,7 @@ function test41_IO_validation(){
 }
 
 function test42_IO_validation(){
-  header "TEST42: verifying the correct output."
+  header "TEST42: verifying the correct output using $PROGRAM_NAME."
 
   INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X);
   OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X);

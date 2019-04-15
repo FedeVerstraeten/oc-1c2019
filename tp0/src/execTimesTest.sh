@@ -86,8 +86,8 @@ function random_files_generation(){
 # ------------------------------------------------------------
 
 
-function test1_encoding_execution_times(){
-  header "TEST1: unix2dos times comparission Perl vs Developed code."
+function test1_encoding_comparison_execution_times(){
+  header "TEST1: unix2dos runtime comparison Perl vs Developed code."
   header "#Test                Perl              Developed code"
   n=1;
   rm -f $TEST_DIR/encodingComp.txt
@@ -112,8 +112,8 @@ function test1_encoding_execution_times(){
   done
 }
 
-function test2_decoding_execution_times(){
-  header "TEST2: dos2unix times comparission Perl vs Developed code."
+function test1_decoding_comparison_execution_times(){
+  header "TEST2: dos2unix runtime comparison Perl vs Developed code."
   header "#Test                Perl              Developed code"
 
 
@@ -146,8 +146,8 @@ PROGRAM_ENC='./unix2dos'
 PROGRAM_DEC='./dos2unix'
 
 random_files_generation
-test1_encoding_execution_times
-test2_decoding_execution_times
+test1_encoding_comparison_execution_times
+test1_decoding_comparison_execution_times
 
 # Delete random files
 rm -f $TEST_DIR/in.*.u $TEST_DIR/out.*.d $TEST_DIR/out.*.u
