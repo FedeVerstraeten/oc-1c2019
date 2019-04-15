@@ -31,8 +31,8 @@
 # space.
 _DEPS = common.h messages.h parser.h unix2dos.h dos2unix.h
 _SRC = main.c messages.c parser.c unix2dos.c dos2unix.c
-_OBJ1 = main_u2d.o messages.o parser.o unix2dos.o dos2unix.o
-_OBJ2 = main_d2u.o messages.o parser.o unix2dos.o dos2unix.o
+_OBJ1 = main_u2d.o messages.o parser.o unix2dos.o
+_OBJ2 = main_d2u.o messages.o parser.o dos2unix.o
 # ------------------------------------------------------------
 # Configuration.
 CC = gcc
