@@ -23,7 +23,7 @@ Main program. Entry point.
 ----------------------------------------------------------- */
 
 /*Necessary to avoid the warning: implicit declaration 
-of function ‘fileno’. This must be at the beginning.*/
+of function fileno. This must be at the beginning.*/
 #define _POSIX_SOURCE
 
 #include <stdio.h>
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  /*Open the files descriptor*/
+  /* Open the files descriptor */
   int codecState=1;
   int infd = fileno(params.inputStream);
   int outfd = fileno(params.outputStream);
