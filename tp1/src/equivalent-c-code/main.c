@@ -33,7 +33,6 @@ of function fileno. This must be at the beginning.*/
 #include "common.h"
 #include "unix2dos.h"
 #include "dos2unix.h"
-#include "parser.h"
 
 int main(int argc, char **argv)
 {
