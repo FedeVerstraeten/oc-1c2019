@@ -28,11 +28,17 @@ of function fileno. This must be at the beginning.*/
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include "common.h"
 #include "unix2dos.h"
 #include "dos2unix.h"
+
+static size_t mystrlen(const char* s)
+{
+  size_t i;
+  for (i=0; s[i] != 0; i++);
+  return i;
+}
 
 int main(int argc, char **argv)
 {
@@ -59,7 +65,7 @@ int main(int argc, char **argv)
 
   if (codecState != 0) {
     /* TODO we should use write function instead of fprintf*/
-    fprintf(stderr, "%s", errmsg[codecState]);
+    write(STDERR_FILENO, errmsg[codecState], mystrlen(errmsg[codecState]));
     exit(EXIT_FAILURE);
   }
   
