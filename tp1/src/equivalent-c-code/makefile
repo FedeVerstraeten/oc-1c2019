@@ -1,6 +1,6 @@
 # ------------------------------------------------------------
 # @Title:   FIUBA - 66.20 Organizacion de Computadoras.
-# @Project: TP0 - Infraestructura basica.
+# @Project: TP1 - Conjunto de instrucciones MIPS.
 # ------------------------------------------------------------
 # @Filename: makefile
 # ------------------------------------------------------------
@@ -13,12 +13,13 @@
 #          federico.verstraeten at gmail dot com
 #
 # @Copyright (C):
-#    This file is part of 'TP0 - Infraestructura basica.'.
+#    This file is part of 'TP1 - Conjunto de instrucciones MIPS'.
 #    Unauthorized copying or use of this file via any medium
 #    is strictly prohibited.
 # ------------------------------------------------------------
 #
-# The source files must have .c extension.
+# The Assembly ource files must have .S extension.
+# The C source files must have .c extension.
 # The object code must have .o extension.
 # The header files must have .h extension.
 #
@@ -29,14 +30,14 @@
 # ------------------------------------------------------------
 # List all the header and object files separated by a blank
 # space.
-_DEPS = common.h messages.h unix2dos.h dos2unix.h
-_SRC = main.c messages.c unix2dos.c dos2unix.c
-_OBJ1 = main_u2d.o messages.o unix2dos.o
-_OBJ2 = main_d2u.o messages.o dos2unix.o
+_DEPS = common.h messages.h unix2dos.h dos2unix.h mystrlen.h
+_SRC = main.c messages.c unix2dos.c dos2unix.c mystrlen.c
+_OBJ1 = main_u2d.o messages.o unix2dos.o mystrlen.o
+_OBJ2 = main_d2u.o messages.o dos2unix.o mystrlen.o
 # ------------------------------------------------------------
 # Configuration.
 CC = gcc
-CFLAGS = -ansi -Wall -I. -O0
+CFLAGS = -Wall -I. -O0
 OUTPUT1 = unix2dos
 OUTPUT2 = dos2unix
 

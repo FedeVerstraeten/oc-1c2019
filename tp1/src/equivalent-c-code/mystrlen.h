@@ -1,8 +1,8 @@
 /* -----------------------------------------------------------
  @Title:   FIUBA - 66.20 Organizacion de Computadoras.
- @Project: TP1 - Conjunto de instrucciones MIPS. 
+ @Project: TP0 - Infraestructura basica.
 --------------------------------------------------------------
- @Filename: common.h
+ @Filename: mystrlen.h
 --------------------------------------------------------------
  @Authors:
     Battan, Manuel Victoriano.
@@ -12,26 +12,18 @@
     Verstraeten, Federico.
           federico.verstraeten at gmail dot com
 
-
- @Copyright (C):
-    This file is part of 'TP1 - Conjunto de instrucciones MIPS.'.
+ @Copyright(C):
+    This file is part of 'TP0 - Infraestructura basica.'.
     Unauthorized copying or use of this file via any medium
     is strictly prohibited.
-------------------------------------------------------------
+--------------------------------------------------------------
 
-Header file for ASM part of codec implementation.
+Own version of Strlen
 
 ----------------------------------------------------------- */
+#ifndef MYSTRLEN__H
+#define MYSTRLEN__H
 
-/*#include <mips/regdef.h>*/
-#include <sys/syscall.h>
-#include <sys/errno.h>
+int mystrlen(const char* s);
 
-/* ------- Misc. constants ------- */
-#define ASCII_NULL 0
-#define ASCII_LF 10
-#define ASCII_TAB 9
-#define ASCII_SPACE 32
-
-#define SIZEOF_UCHAR 1
-
+#endif

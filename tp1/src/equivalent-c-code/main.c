@@ -13,7 +13,7 @@
           federico.verstraeten at gmail dot com
 
  @Copyright(C):
-    This file is part of 'TP0 - Infraestructura basica.'.
+    This file is part of 'TP1 - Conjunto de instrucciones MIPS'.
     Unauthorized copying or use of this file via any medium
     is strictly prohibited.
 --------------------------------------------------------------
@@ -33,40 +33,24 @@ of function fileno. This must be at the beginning.*/
 #include "unix2dos.h"
 #include "dos2unix.h"
 
-static size_t mystrlen(const char* s)
-{
-  size_t i;
-  for (i=0; s[i] != 0; i++);
-  return i;
-}
+size_t mystrlen(const char* s);
 
 int main(int argc, char **argv)
 {
 
-  /* Open the files descriptor */
   int codecState=1;
-  /* int infd = fileno(stdin);
-  int outfd = fileno(stdout); */
-
-  /* File Descriptor defined into /usr/include/unistd.h
-     is not neccesary open and close them. 
-    STDIN_FILENO  0 -- Standard input.
-    STDOUT_FILENO 1 -- Standard output.
-    STDERR_FILENO 2 -- Standard error output.
-  */
 
 #ifdef UNIX2DOS_ENC
   codecState = unix2dos(STDIN_FILENO, STDOUT_FILENO);
 #endif
-
+ 
 #ifdef DOS2UNIX_ENC
   codecState = dos2unix(STDIN_FILENO, STDOUT_FILENO);
 #endif
 
   if (codecState != 0) {
-    /* TODO we should use write function instead of fprintf*/
     write(STDERR_FILENO, errmsg[codecState], mystrlen(errmsg[codecState]));
-    exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
   
   return EXIT_SUCCESS;
