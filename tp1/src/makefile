@@ -36,25 +36,26 @@
 # List all the header and object files separated by a blank
 # space.
 _DEPS = common.h messages.h 
-_SRC1 = main_u2d.S messages.S unix2dos.S 
-_SRC2 = main_d2u.S messages.S dos2unix.S
-_OBJ1 = main_u2d.o messages.o unix2dos.o
-_OBJ2 = main_d2u.o messages.o dos2unix.o
+_SRC1 = main_u2d.S messages.S unix2dos.S mystrlen.S 
+_OBJ1 = main_u2d.o messages.o unix2dos.o mystrlen.o
+_SRC2 = main_d2u.S messages.S dos2unix.S mystrlen.S 
+_OBJ2 = main_d2u.o messages.o dos2unix.o mystrlen.o
+
 # ------------------------------------------------------------
 # Configuration.
 CC = gcc
-CFLAGS = -ansi -Wall -I. -O0 -DNETBSD3
+CFLAGS = -Wall -I. -O0 -DNETBSD3
 OUTPUT1 = unix2dos
 OUTPUT2 = dos2unix
 
 # ------------------------------------------------------------
-all: $(OUTPUT1) $(OUTPUT2)
+all: $(OUTPUT1) $(OUTPUT2) 
 
 $(OUTPUT1): $(_SRC1) $(_DEPS)
-  $(CC) $(CFLAGS) -o $@ $(_SRC1)
+	$(CC) $(CFLAGS) -o $(OUTPUT1) $(_SRC1)
 
 $(OUTPUT2): $(_SRC2) $(_DEPS)
-  $(CC) $(CFLAGS) -o $@ $(_SRC2)
+	$(CC) $(CFLAGS) -o $(OUTPUT2) $(_SRC2)
 
 assembly:
 	$(CC) $(CFLAGS) -S $(_SRC1) $(_SRC2) -mrnames
@@ -65,3 +66,4 @@ clean:
 	rm -f ./*.o *~ core ./*~ ./*.s
 	rm -f $(OUTPUT1)
 	rm -f $(OUTPUT2)
+	
