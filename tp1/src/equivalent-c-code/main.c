@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------
  @Title:   FIUBA - 66.20 Organizacion de Computadoras.
- @Project: TP0 - Infraestructura basica.
+ @Project: TP1 - Conjunto de instrucciones MIPS.
 --------------------------------------------------------------
  @Filename: main.c
 --------------------------------------------------------------
@@ -39,6 +39,13 @@ int main(int argc, char **argv)
 {
 
   int codecState=1;
+  
+  /* File Descriptor defined into /usr/include/unistd.h
+     is not neccesary open and close them. 
+    STDIN_FILENO  0 -- Standard input.
+    STDOUT_FILENO 1 -- Standard output.
+    STDERR_FILENO 2 -- Standard error output.
+  */
 
 #ifdef UNIX2DOS_ENC
   codecState = unix2dos(STDIN_FILENO, STDOUT_FILENO);

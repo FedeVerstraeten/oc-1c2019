@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------
  @Title:   FIUBA - 66.20 Organizacion de Computadoras.
- @Project: TP0 - Infraestructura basica.
+ @Project: TP1 - Conjunto de instrucciones MIPS
 --------------------------------------------------------------
  @Filename: unix2dos.c
 --------------------------------------------------------------
@@ -13,7 +13,7 @@
           federico.verstraeten at gmail dot com
 
  @Copyright(C):
-    This file is part of 'TP0 - Infraestructura basica.'.
+    This file is part of 'TP1 - Conjunto de instrucciones MIPS'.
     Unauthorized copying or use of this file via any medium
     is strictly prohibited.
 --------------------------------------------------------------
