@@ -72,134 +72,6 @@ function error_msg() {
 }
 
 # ------------------------------------------------------------
-# Input parameters tests.
-# ------------------------------------------------------------
-
-# Define the expected outputs of each of the test cases with
-# its associated test functions.
-
-function test1_parameter_input_inexistent_stream(){
-
-  EXPECTED_OUTPUT_INEXISTENT_INPUT_STREAM=("ERROR: Can't open input stream.")
-
-  header "TEST1: inexistent 'input' stream."
-
-  commands=(
-  "-i 1"
-  "-i false_input.txt"
-  )
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_INEXISTENT_INPUT_STREAM" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-function test12_parameter_input_invalid_stream(){
-
-  EXPECTED_OUTPUT_INPUT_INVALID_STREAM=("ERROR: Invalid input stream.")
-
-  header "TEST12: invalid 'input' stream."
-
-  commands=(
-  "-i ."
-  "-i .."
-  "-i /"
-  "-i //"
-  )
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_INPUT_INVALID_STREAM" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-function test2_parameter_output_stream(){
-
-  EXPECTED_OUTPUT_INVALID_OUTPUT_STREAM=("ERROR: Invalid output stream.")
-
-  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2.*/\1/g' -X)
-
-  header "TEST2: invalid 'output' stream."
-
-  commands=(
-  "-i ../test/loremipsum_${INPUT_FILE}.txt -o ."
-  "-i ../test/loremipsum_${INPUT_FILE}.txt -o .."
-  "-i ../test/loremipsum_${INPUT_FILE}.txt -o /"
-  "-i ../test/loremipsum_${INPUT_FILE}.txt -o //"
-  )
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-    if [[ "$EXPECTED_OUTPUT_INVALID_OUTPUT_STREAM" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-
-function test3_valid_parameters(){
-
-  EXPECTED_OUTPUT_VALID_PARAMETERS=()
-
-  INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2.*/\1/g' -X)
-
-  header "TEST3: all options with correct parameters."
-
-  commands=(
-  "-i $TEST_DIR/loremipsum_${INPUT_FILE}.txt -o $TEST_DIR/out_test3_${INPUT_FILE}_1.txt"
-  "-i $TEST_DIR/out_test3_${INPUT_FILE}_1.txt -o $TEST_DIR/out_test3_${INPUT_FILE}_2.txt")
-
-  for i in "${commands[@]}"
-  do
-
-    msg_testing "$PROGRAM_NAME $i"
-
-    PROGRAM_OUTPUT=$($PROGRAM_NAME $i 2>&1)
-
-
-    if [[ "$EXPECTED_OUTPUT_VALID_PARAMETERS" == "$PROGRAM_OUTPUT" ]]; then
-      msg_true "$PROGRAM_OUTPUT"
-    else
-      msg_false "$PROGRAM_OUTPUT"
-      failedTests=$(($failedTests+1));
-    fi
-
-  done
-}
-
-# ------------------------------------------------------------
 # Input-output validation tests.
 # ------------------------------------------------------------
 function IO_validation_passed(){
@@ -215,7 +87,7 @@ function test41_IO_validation(){
   INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X)
   OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X)
 
-  $PROGRAM_NAME -i $TEST_DIR/loremipsum_${INPUT_FILE}.txt -o $TEST_DIR/loremipsum_out.txt;
+  $PROGRAM_NAME < $TEST_DIR/loremipsum_${INPUT_FILE}.txt > $TEST_DIR/loremipsum_out.txt;
 
   diff_result="$(diff $TEST_DIR/loremipsum_out.txt $TEST_DIR/loremipsum_${OUTPUT_FILE}.txt)";
 
@@ -235,7 +107,7 @@ function test42_IO_validation(){
   INPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\1/g' -X);
   OUTPUT_FILE=$(echo $PROGRAM_NAME | perl -pi -e 's/..(.*)2(.*).*/\2/g' -X);
 
-  program_output="$($PROGRAM_NAME -i $TEST_DIR/${INPUT_FILE}.txt -o - | od -t c)";
+  program_output="$($PROGRAM_NAME < $TEST_DIR/${INPUT_FILE}.txt -o - | od -t c)";
   correct_output="$(od -t c $TEST_DIR/${OUTPUT_FILE}.txt)";
   diff_result="$(diff  <(echo $program_output ) <(echo $correct_output))";
 
@@ -254,15 +126,15 @@ function test43_IO_validation(){
   n=1;
   nLimit=$((1024*n));
 
-  msg_testing "$PROGRAM_ENC -i $TEST_DIR/input.n.u -o $TEST_DIR/output.n.d"
-  msg_testing "$PROGRAM_DEC -i $TEST_DIR/output.n.d -o $TEST_DIR/output.n.u"
+  msg_testing "$PROGRAM_ENC < $TEST_DIR/input.n.u > $TEST_DIR/output.n.d"
+  msg_testing "$PROGRAM_DEC < $TEST_DIR/output.n.d > $TEST_DIR/output.n.u"
 
   while [ $n -le $nLimit ]
   do
     head -c $n </dev/urandom >$TEST_DIR/input.$n.u;
 
-    $PROGRAM_ENC -i $TEST_DIR/input.$n.u -o $TEST_DIR/output.$n.d;
-    $PROGRAM_DEC -i $TEST_DIR/output.$n.d -o $TEST_DIR/output.$n.u;
+    $PROGRAM_ENC < $TEST_DIR/input.$n.u > $TEST_DIR/output.$n.d;
+    $PROGRAM_DEC < $TEST_DIR/output.$n.d > $TEST_DIR/output.$n.u;
 
     diff_result="$(diff -q $TEST_DIR/input.$n.u $TEST_DIR/output.$n.u)";
 
@@ -351,9 +223,9 @@ function test5_encoding_execution_times(){
   while [ $n -le $nLimit ]
   do
     head -c $n </dev/urandom >$TEST_DIR/in.$n.u;
-    ts=$(date +%s%N);
-    $PROGRAM_ENC -i $TEST_DIR/in.$n.u -o $TEST_DIR/out.$n.d;
-    tt=$((($(date +%s%N) - $ts)/1000000));
+    ts=$(date +%s);
+    $PROGRAM_ENC < $TEST_DIR/in.$n.u > $TEST_DIR/out.$n.d;
+    tt=$((($(date +%s) - $ts)/1000000));
 
     printf 'n: %-10d %10s %.2f [ms]\n' "$n" " " "$tt"
     printf '%-10d %.2f\n' "$n" "$tt" >> $TEST_DIR/encodingTimes.txt
@@ -375,10 +247,10 @@ function test6_decoding_execution_times(){
   while [ $n -le $nLimit ]
   do
     head -c $n </dev/urandom >$TEST_DIR/in.$n.u;
-    $PROGRAM_ENC -i $TEST_DIR/in.$n.u -o $TEST_DIR/out.$n.d;
-    ts=$(date +%s%N);
-    $PROGRAM_DEC -i $TEST_DIR/out.$n.d -o $TEST_DIR/out.$n.u;
-    tt=$((($(date +%s%N) - $ts)/1000000));
+    $PROGRAM_ENC < $TEST_DIR/in.$n.u > $TEST_DIR/out.$n.d;
+    ts=$(date +%s);
+    $PROGRAM_DEC < $TEST_DIR/out.$n.d > $TEST_DIR/out.$n.u;
+    tt=$((($(date +%s) - $ts)/1000000));
 
     printf 'n: %-10d %10s %.2f [ms]\n' "$n" " " "$tt"
     printf '%-10d %.2f\n' "$n" "$tt" >> $TEST_DIR/decodingTimes.txt
@@ -397,10 +269,6 @@ function test6_decoding_execution_times(){
 # Program name to test.
 PROGRAM_NAME='./unix2dos'
 
-test1_parameter_input_inexistent_stream
-test12_parameter_input_invalid_stream
-test2_parameter_output_stream
-test3_valid_parameters
 test41_IO_validation
 test42_IO_validation
 
@@ -411,10 +279,6 @@ test42_IO_validation
 # Program name to test.
 PROGRAM_NAME='./dos2unix'
 
-test1_parameter_input_inexistent_stream
-test12_parameter_input_invalid_stream
-test2_parameter_output_stream
-test3_valid_parameters
 test41_IO_validation
 test42_IO_validation
 

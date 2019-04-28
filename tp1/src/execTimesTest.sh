@@ -105,14 +105,14 @@ function test1_encoding_comparison_execution_times(){
   while [ $n -le $NLIMIT ]
   do
     # Encoding unix2dos using Perl
-    ts=$(date +%s%N);
+    ts=$(date +%s);
     perl -pi -e 's/\n/\r\n/' -X <$TEST_DIR/in.$n.u >$TEST_DIR/out.$n.d;
-    tt_std=$((($(date +%s%N) - $ts)/1000000));
+    tt_std=$((($(date +%s) - $ts)/1000000));
 
     # Encoding using development
-    ts=$(date +%s%N);
-    $PROGRAM_ENC -i $TEST_DIR/in.$n.u -o $TEST_DIR/out.$n.d;
-    tt_dev=$((($(date +%s%N) - $ts)/1000000));    
+    ts=$(date +%s);
+    $PROGRAM_ENC < $TEST_DIR/in.$n.u > $TEST_DIR/out.$n.d;
+    tt_dev=$((($(date +%s) - $ts)/1000000));    
 
     printf 'n: %-8d %8s %.2f [ms] %8s %.2f [ms]\n' "$n" " " "$tt_std" " " "$tt_dev" 
     printf '%-8d %-8.2f %.2f\n' "$n" "$tt_std" "$tt_dev">> $TEST_DIR/encodingComp.txt
@@ -133,13 +133,13 @@ function test1_decoding_comparison_execution_times(){
   while [ $n -le $NLIMIT ]
   do
    # Decoding dos2unix using Perl
-    ts=$(date +%s%N);
+    ts=$(date +%s);
     perl -pi -e 's/\r\n/\n/' -X <$TEST_DIR/in.$n.u >$TEST_DIR/out.$n.d;
-    tt_std=$((($(date +%s%N) - $ts)/1000000));
+    tt_std=$((($(date +%s) - $ts)/1000000));
 
-    ts=$(date +%s%N);
-    $PROGRAM_DEC -i $TEST_DIR/out.$n.d -o $TEST_DIR/out.$n.u;
-    tt_dev=$((($(date +%s%N) - $ts)/1000000));
+    ts=$(date +%s);
+    $PROGRAM_DEC < $TEST_DIR/out.$n.d > $TEST_DIR/out.$n.u;
+    tt_dev=$((($(date +%s) - $ts)/1000000));
 
     printf 'n: %-8d %8s %.2f [ms] %8s %.2f [ms]\n' "$n" " " "$tt_std" " " "$tt_dev" 
     printf '%-8d %-8.2f %.2f\n' "$n" "$tt_std" "$tt_dev">> $TEST_DIR/decodingComp.txt
