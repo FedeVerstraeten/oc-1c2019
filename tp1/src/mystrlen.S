@@ -39,27 +39,27 @@ mystrlen:
   # Save the callee-saved registers used by 
   # the caller in the SRA.
   sw  $fp, FP(sp)
+  sw  gp,GP(sp)
+
   move  $fp, sp
 
   # Save 1st arg in ABA caller (always)
   sw  a0, SIZE_MYSTRLEN($fp)
 
-  # for (idx=0; s[idx] != 0; i++)
+  # for (idx=0; s[idx] != 0; idx++)
   move  t0, zero  # idx=0: t0, fp+0
   sw  t0, idx($fp)  # idx: t0
 
 _for_loop:
   # For condition
-  #lw  a0, SIZE_MYSTRLEN($fp)     ## redundante
-  #lw  t0, idx($fp)      ## redundante
   addu  t1, a0, t0  # load address s[idx]: t1
   lb  t1, 0(t1)     # load content s[idx]
   beq t1, zero, _end_for # if s[idx] != 0
   
-  # i++
-  #lw  t0, idx($fp)     ## redundante
+  # idx++
+  lw  t0, idx($fp)
   addu  t0, t0, 1
-  #sw  t0, idx($fp)      ## redundante
+  sw  t0, idx($fp)
   j _for_loop
 
 _end_for:
@@ -71,4 +71,3 @@ _end_for:
 
   .end  mystrlen
   .size mystrlen,.-mystrlen
-

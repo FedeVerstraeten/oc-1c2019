@@ -35,3 +35,11 @@ Header file for ASM part of codec implementation.
 
 #define SIZEOF_UCHAR 1
 
+/* ------- Standard input-output ------- */
+#define STDIN_FILENO  0 /* Standard input.  */
+#define STDOUT_FILENO 1 /* Standard output.  */
+#define STDERR_FILENO 2 /* Standard error output.*/
+
+/* ------- Exit return ------- */
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
