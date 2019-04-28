@@ -37,6 +37,8 @@
 *.hex
 tp0/src/unix2dos
 tp0/src/dos2unix
+tp1/src/unix2dos
+tp1/src/dos2unix
 
 # Debug files
 *.dSYM/
@@ -62,3 +64,8 @@ tp0/test/decodingTimes.txt
 tp0/test/out_test*.txt
 tp0/test/encodingComp.txt
 tp0/test/decodingComp.txt
+tp1/test/encodingTimes.txt
+tp1/test/decodingTimes.txt
+tp1/test/out_test*.txt
+tp1/test/encodingComp.txt
+tp1/test/decodingComp.txt
