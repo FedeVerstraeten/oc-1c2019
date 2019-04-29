@@ -20,16 +20,6 @@
 #    is strictly prohibited.
 # ------------------------------------------------------------
 #
-# Script to test errors in the program arguments.
-#
-# To remove newlines from a textfile, use
-# printf %s "$(cat file)" > file
-#
-# To print contents of a file, including control characters, do:
-# oc -c file
-#
-# ------------------------------------------------------------
-#
 # Script to test execution times.
 # Comparison between the developed code and a Perl script.
 #
@@ -107,14 +97,14 @@ function test1_encoding_comparison_execution_times(){
     # Encoding unix2dos using Perl
     ts=$(date +%s);
     perl -pi -e 's/\n/\r\n/' -X <$TEST_DIR/in.$n.u >$TEST_DIR/out.$n.d;
-    tt_std=$((($(date +%s) - $ts)/1000000));
+    tt_std=$(($(date +%s) - $ts));
 
     # Encoding using development
     ts=$(date +%s);
     $PROGRAM_ENC < $TEST_DIR/in.$n.u > $TEST_DIR/out.$n.d;
-    tt_dev=$((($(date +%s) - $ts)/1000000));    
+    tt_dev=$(($(date +%s) - $ts));    
 
-    printf 'n: %-8d %8s %.2f [ms] %8s %.2f [ms]\n' "$n" " " "$tt_std" " " "$tt_dev" 
+    printf 'n: %-8d %8s %.2f [s] %8s %.2f [s]\n' "$n" " " "$tt_std" " " "$tt_dev" 
     printf '%-8d %-8.2f %.2f\n' "$n" "$tt_std" "$tt_dev">> $TEST_DIR/encodingComp.txt
   
     n=$((n*2));
@@ -135,13 +125,13 @@ function test1_decoding_comparison_execution_times(){
    # Decoding dos2unix using Perl
     ts=$(date +%s);
     perl -pi -e 's/\r\n/\n/' -X <$TEST_DIR/in.$n.u >$TEST_DIR/out.$n.d;
-    tt_std=$((($(date +%s) - $ts)/1000000));
+    tt_std=$(($(date +%s) - $ts));
 
     ts=$(date +%s);
     $PROGRAM_DEC < $TEST_DIR/out.$n.d > $TEST_DIR/out.$n.u;
-    tt_dev=$((($(date +%s) - $ts)/1000000));
+    tt_dev=$(($(date +%s) - $ts));
 
-    printf 'n: %-8d %8s %.2f [ms] %8s %.2f [ms]\n' "$n" " " "$tt_std" " " "$tt_dev" 
+    printf 'n: %-8d %8s %.2f [s] %8s %.2f [s]\n' "$n" " " "$tt_std" " " "$tt_dev" 
     printf '%-8d %-8.2f %.2f\n' "$n" "$tt_std" "$tt_dev">> $TEST_DIR/decodingComp.txt
 
     n=$((n*2));

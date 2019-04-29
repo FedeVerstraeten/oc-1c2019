@@ -225,9 +225,9 @@ function test5_encoding_execution_times(){
     head -c $n </dev/urandom >$TEST_DIR/in.$n.u;
     ts=$(date +%s);
     $PROGRAM_ENC < $TEST_DIR/in.$n.u > $TEST_DIR/out.$n.d;
-    tt=$((($(date +%s) - $ts)/1000000));
+    tt=$(($(date +%s) - $ts));
 
-    printf 'n: %-10d %10s %.2f [ms]\n' "$n" " " "$tt"
+    printf 'n: %-10d %10s %.2f [s]\n' "$n" " " "$tt"
     printf '%-10d %.2f\n' "$n" "$tt" >> $TEST_DIR/encodingTimes.txt
 
     rm -f $TEST_DIR/in.$n.u $TEST_DIR/out.$n.d
@@ -250,9 +250,9 @@ function test6_decoding_execution_times(){
     $PROGRAM_ENC < $TEST_DIR/in.$n.u > $TEST_DIR/out.$n.d;
     ts=$(date +%s);
     $PROGRAM_DEC < $TEST_DIR/out.$n.d > $TEST_DIR/out.$n.u;
-    tt=$((($(date +%s) - $ts)/1000000));
+    tt=$(($(date +%s) - $ts));
 
-    printf 'n: %-10d %10s %.2f [ms]\n' "$n" " " "$tt"
+    printf 'n: %-10d %10s %.2f [s]\n' "$n" " " "$tt"
     printf '%-10d %.2f\n' "$n" "$tt" >> $TEST_DIR/decodingTimes.txt
 
     rm -f $TEST_DIR/in.$n.u $TEST_DIR/out.$n.d $TEST_DIR/out.$n.u
