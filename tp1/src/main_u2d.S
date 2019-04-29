@@ -58,7 +58,7 @@ main:
   sw  a1,argv($fp)
 
 ##############################
-# body: main                 #
+# body: main_u2d             #
 ##############################
 # Initialize locals.
   li t0,1

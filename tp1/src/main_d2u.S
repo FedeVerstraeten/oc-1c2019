@@ -58,19 +58,19 @@ main:
   sw  a1,argv($fp)
 
 ##############################
-# body: main                 #
+# body: main_d2u             #
 ##############################
 # Initialize locals.
   li t0,1
   sw t0,codecState($fp)
 
-# Call 'unix2dos' to encode input.
+# Call 'dos2unix' to encode input.
   li  a0,STDIN_FILENO
   li  a1,STDOUT_FILENO
   la  t9,dos2unix
   jal  ra,t9
 
-# Check if unix2dos had errors.
+# Check if dos2unix had errors.
   sw  v0,codecState($fp)
   lw  t0,codecState($fp)
   beq  t0,zero,return_0
