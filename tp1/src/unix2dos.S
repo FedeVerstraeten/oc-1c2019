@@ -1,152 +1,150 @@
 #include "common.h"
-#include "messages.h"	
-
-#define SIZE_SF 24
-#define OFFSET_BUFFER 36
-# ABA caller.
-#define OUTFD 28
-#define INTFD 24
-
-# Saved-registers area (SRA).
-#define FP 20
-#define GP 16
+#include "messages.h"  
 
 # Local and Temporary Area (LTA).
-#define PADDING_0 12
-#define A_BYTE 8
-#define CONTROL_CHAR 4
 #define BUFFER 0
+#define CONTROL_CHAR 1
+#define PADDING_0 2 
+#define A_BYTE 4
+
+
+# Saved-registers area (SRA).
+#define GP 8
+#define FP 12
+
+# ABA caller.
+#define INTFD 16
+#define OUTFD 20
+
+#define SIZE_SF FP + 4
 
 .abicalls
-	.text
-	.align	2
-	.globl	unix2dos
-	.ent	unix2dos
+.text
+.align  2
+.globl  unix2dos
+.ent  unix2dos
 
 unix2dos:
-	# Debugger metadata.
-	.frame	$fp,SIZE_SF,ra
-	# Pipeline magic.	
-	.set	noreorder	
-	.cpload	t9		
-	.set	reorder
-	# Allocate memory for the stack.		
-	subu	sp,sp,SIZE_SF
-	# SRA beginning area.
-	.cprestore GP
+  # Debugger metadata.
+  .frame  $fp,SIZE_SF,ra
+  # Pipeline magic.  
+  .set  noreorder  
+  .cpload  t9    
+  .set  reorder
+  # Allocate memory for the stack.    
+  subu  sp,sp,SIZE_SF
+  # SRA beginning area.
+  .cprestore GP
 
-	# Save the callee-saved registers used by the caller in the SRA.
-	sw  $fp,FP(sp)
-	sw  gp, GP(sp)
-	# We must set the $fp to the beginning of the stack.
-	move $fp,sp
+  # Save the callee-saved registers used by the caller in the SRA.
+  sw  $fp,FP(sp)
+  sw  gp, GP(sp)
+  # We must set the $fp to the beginning of the stack.
+  move $fp,sp
 
-	# Now we save the arguments that were loaded by the caller
-	# in the area reserved by the caller.
-	sw  a0,INTFD($fp)
-	sw  a1,OUTFD($fp)
+  # Now we save the arguments that were loaded by the caller
+  # in the area reserved by the caller.
+  sw  a0,INTFD($fp)
+  sw  a1,OUTFD($fp)
 
-	# Add local parameters	
-	sw	zero,OFFSET_BUFFER($fp)
-	#// Cargo en v0 el puntero al buffer.
-	#lw	v0,OFFSET_BUFFER($fp)
-	#// Cargo en v0 el 1er byte del buffer.
-	#lbu	v0,0(v0)
-	#// Guardo el 1er byte en el stack frame
-	#sb	v0,BUFFER($fp)
-	#// Cargo nuevamente la dirección del buffer.
-	#lw	v0,OFFSET_BUFFER($fp)
+  # Set local variables
+  sb 	zero,BUFFER($fp)
+  li  t0,ASCII_CR
+  sb  t0,CONTROL_CHAR($fp)
+  sw  zero,A_BYTE($fp)
+  
+  # Read one character using syscall read
+  lw  a0,INTFD($fp)
+  addu a1,$fp,BUFFER
+  li  a2,1
+  li  v0,SYS_read
+  syscall
 
-	li	v0,ASCII_CR
-	sb	v0,CONTROL_CHAR($fp)
-	sw	zero,A_BYTE($fp)
-	
-	# Read one character using syscall read
-	lw	a0,INTFD($fp)
-	addu      a1, $fp, BUFFER
-	li	a2,1
-	li	v0,SYS_read
-        syscall
-	#jal	ra,t9
+  # If a_byte > 0
+  sw  v0,A_BYTE($fp)
+  bgtz  v0,while_loop
+  nop
+  li  v0,ERROR_NUMBER_READ_FILE
+  b  exit_function
 
-	# If a_byte minus 1
-	sw	v0,A_BYTE($fp)
-	bgez	v0,while_loop
-	nop
-	li	v0,ERROR_NUMBER_READ_FILE
-	b	exit_function
-	nop
 while_loop:
-	lw	v0,A_BYTE($fp)
-	beq	v0,ASCII_LF,equal_LF
-	nop
-	sw	v0,A_BYTE($fp)
-	b	exit_while
-	nop
-equal_LF:    #If buffer equal to LF
-	lw	v1,BUFFER($fp)
-	li	v0,ASCII_LF
-	bne	v1,v0,else_buffer
-	nop
-	lw	v0,CONTROL_CHAR
-	lw	a0,OUTFD($fp)
-	move	a1,v0
-	li	a2,1
-	li	v0,SYS_write
-        syscall
-	#jal	ra,t9
+	# While pre-condition a_byte > 0
+  lw  t0,A_BYTE($fp)
+  bgtz  t0,equal_LF
+  nop
+  b  exit_while
 
-	lw	a0,OUTFD($fp)
-	#lw      a1, BUFFER($fp)
-	lw      a1, BUFFER($fp)
-	li	a2,1
-	li	v0,SYS_write
-        syscall
-	#jal	ra,t9
-	#sw	v0,CONTROL_CHAR($fp)
-	b	read_buffer
-	nop
-else_buffer:    # If not equal to LF
-	lw	a0,OUTFD($fp)
-	#lw      a1, BUFFER($fp)
-	lw      a1, BUFFER($fp)
-	li	a2,1
-	li	v0,SYS_write
-        syscall
-	#jal	ra,t9
+equal_LF:
+	#If buffer equal to LF
+  lbu  t1,BUFFER($fp)
+  li  t0,ASCII_LF
+  bne  t1,t0,else_buffer
+  
+  # write(outfd, &control_character, 1);
+  lw  a0,OUTFD($fp) # outfd
+  addu a1,$fp,CONTROL_CHAR # &control_character
+  li  a2,1
+  li  v0,SYS_write
+  syscall
 
+  # Store return value of syscall
+  sw  v0,A_BYTE($fp)
+ 
+  # write(outfd, &buffer[0], 1);
+  lw  a0,OUTFD($fp) # outfd
+  addu a1,$fp,BUFFER # &(*(buffer+0))
+  li  a2,1
+  li  v0,SYS_write
+  syscall
+
+  # Store return value of syscall
+  sw  v0,A_BYTE($fp)
+  b  read_buffer
+
+else_buffer:    
+	# If not equal to LF
+  # write(outfd, &buffer[0], 1);
+  lw  a0,OUTFD($fp) # outfd
+  addu a1,$fp,BUFFER # &(*(buffer+0))
+  li  a2,1
+  li  v0,SYS_write
+  syscall
+  
+ 	# Store return value of syscall
+  sw  v0,A_BYTE($fp)
 
 read_buffer:
-	lw	a0,INTFD($fp)
-	#lw      a1, BUFFER($fp)
-	lw      a1, BUFFER($fp)
-	li	a2,1
-	li	v0,SYS_read
-        syscall
-	#jal	ra,t9
+	# read(infd, &buffer[0], 1);
+  lw  a0,INTFD($fp) # infd
+  addu a1,$fp,BUFFER # &(*(buffer+0))
+  li  a2,1
+  li  v0,SYS_read
+  syscall
 
-	bgez	v0,while_loop
-	nop
+	# Store return value of syscall
+  sw  v0,A_BYTE($fp)
+
+ 	# If a_byte > 0
+  bgtz  v0,while_loop
+ 
 exit_while: # Check if we have error
-	lw	v1,A_BYTE($fp)
-	li	v0,-1
-	bne	v1,v0,return_ok
-	nop
-	li	v0,ERROR_NUMBER_READ_FILE
-	b	exit_function
-	nop
-return_ok:
-	lw	v0,EXIT_SUCCESS
-exit_function:
-	# Stack frame unwinding. Restoring callee-saved reg
-	move sp,$fp
-	lw  gp,GP(sp)
-	lw  $fp,FP(sp)
-
-	# Delete stack frame space and return
-	addu  sp,sp,SIZE_SF
-	j  ra
+  lw  t1,A_BYTE($fp)
+  li  t0,-1
+  bne  t1,t0,return_ok
+  li  v0,ERROR_NUMBER_READ_FILE
+  b  exit_function
   
-	.end	unix2dos
-	.size	unix2dos, .-unix2dos	
+return_ok:
+  li  v0,EXIT_SUCCESS
 
+exit_function:
+  # Stack frame unwinding. Restoring callee-saved reg
+  lw  gp,GP(sp)
+  lw  $fp,FP(sp)
+
+  # Delete stack frame space and return
+  addu  sp,sp,SIZE_SF
+  j  ra
+  
+.end  unix2dos
+.size  unix2dos, .-unix2dos  
