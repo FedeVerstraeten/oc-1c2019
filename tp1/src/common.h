@@ -30,6 +30,7 @@ Header file for ASM part of codec implementation.
 /* ------- Misc. constants ------- */
 #define ASCII_NULL 0
 #define ASCII_LF 10
+#define ASCII_CR 13
 #define ASCII_TAB 9
 #define ASCII_SPACE 32
 
