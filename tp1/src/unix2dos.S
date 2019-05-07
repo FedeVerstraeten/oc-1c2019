@@ -27,18 +27,21 @@
 unix2dos:
   # Debugger metadata.
   .frame  $fp,SIZE_SF,ra
-  # Pipeline magic.  
-  .set  noreorder  
-  .cpload  t9    
+
+  # Pipeline magic.
+  .set  noreorder
+  .cpload  t9
   .set  reorder
-  # Allocate memory for the stack.    
+  
+  # Allocate memory for the stack. 
   subu  sp,sp,SIZE_SF
+  
   # SRA beginning area.
   .cprestore GP
 
   # Save the callee-saved registers used by the caller in the SRA.
   sw  $fp,FP(sp)
-  sw  gp, GP(sp)
+  sw  gp,GP(sp)
   # We must set the $fp to the beginning of the stack.
   move $fp,sp
 
@@ -99,9 +102,9 @@ equal_LF:
 
   # Store return value of syscall
   sw  v0,A_BYTE($fp)
-  b  read_buffer
+  b  	read_buffer
 
-else_buffer:    
+else_buffer: 
 	# If not equal to LF
   # write(outfd, &buffer[0], 1);
   lw  a0,OUTFD($fp) # outfd
