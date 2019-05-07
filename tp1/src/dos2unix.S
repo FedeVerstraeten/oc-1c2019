@@ -1,156 +1,101 @@
-#include "common.h"     	
-  
+#include "common.h"
+
+# Local and Temporary Area (LTA).
+#define TEMP_1 0
+#define TEMP_0 4
+
+# Saved-registers area (SRA).
+#define GP 8
+#define FP 12
+#define RA 16
+#define PADDING_1 20
+
+#define FRAME_SIZE 24
+ 
 .abicalls
 .text
 .align	2
 .globl	dos2unix
 .ent	dos2unix
 dos2unix:
-	.frame	$fp,56,ra		# vars= 16, regs= 3/0, args= 16, extra= 8
-	.mask	0xd0000000,-8
-	.fmask	0x00000000,0
-	.set	noreorder
-	.cpload	t9
-	.set	reorder
-	subu	sp,sp,56
-	.cprestore 16
-	sw	ra,48(sp)
-	sw	$fp,44(sp)
-	sw	gp,40(sp)
-	move	$fp,sp
-	sw	a0,56($fp)
-	sw	a1,60($fp)
-	sh	zero,24($fp)
-	sw	zero,32($fp)
-	lw	a0,56($fp)
-	addu	a1,$fp,24
-	li	a2,1			# 0x1
-	la	t9,read
-	jal	ra,t9
-	sw	v0,32($fp)
-	lw	v1,32($fp)
-	li	v0,-1			# 0xffffffffffffffff
-	bne	v1,v0,L18
-	li	v0,2			# 0x2
-	sw	v0,36($fp)
-	b	L17
-L18:
-	.set	noreorder
-	nop
-	.set	reorder
-L19:
-	lw	v0,32($fp)
-	bgtz	v0,L21
-	b	L20
-L21:
-	addu	v0,$fp,25
-	lw	a0,56($fp)
-	move	a1,v0
-	li	a2,1			# 0x1
-	la	t9,read
-	jal	ra,t9
-	sw	v0,32($fp)
-	lw	v1,32($fp)
-	li	v0,-1			# 0xffffffffffffffff
-	bne	v1,v0,L22
-	li	v0,2			# 0x2
-	sw	v0,36($fp)
-	b	L17
-L22:
-	lw	v0,32($fp)
-	bne	v0,zero,L23
-	lw	a0,60($fp)
-	addu	a1,$fp,24
-	li	a2,1			# 0x1
-	la	t9,write
-	jal	ra,t9
-	sw	v0,32($fp)
-	lw	v1,32($fp)
-	li	v0,-1			# 0xffffffffffffffff
-	bne	v1,v0,L24
-	li	v0,1			# 0x1
-	sw	v0,36($fp)
-	b	L17
-L24:
-	sw	zero,36($fp)
-	b	L17
-L23:
-	lbu	v1,24($fp)
-	li	v0,13			# 0xd
-	bne	v1,v0,L25
-	lbu	v1,25($fp)
-	li	v0,10			# 0xa
-	bne	v1,v0,L25
-	addu	v0,$fp,25
-	lw	a0,60($fp)
-	move	a1,v0
-	li	a2,1			# 0x1
-	la	t9,write
-	jal	ra,t9
-	sw	v0,32($fp)
-	lw	v1,32($fp)
-	li	v0,-1			# 0xffffffffffffffff
-	bne	v1,v0,L26
-	li	v0,1			# 0x1
-	sw	v0,36($fp)
-	b	L17
-L26:
-	lw	a0,56($fp)
-	addu	a1,$fp,24
-	li	a2,1			# 0x1
-	la	t9,read
-	jal	ra,t9
-	sw	v0,32($fp)
-	lw	v1,32($fp)
-	li	v0,-1			# 0xffffffffffffffff
-	bne	v1,v0,L19
-	li	v0,2			# 0x2
-	sw	v0,36($fp)
-	b	L17
-L25:
-	lw	a0,60($fp)
-	addu	a1,$fp,24
-	li	a2,1			# 0x1
-	la	t9,write
-	jal	ra,t9
-	sw	v0,32($fp)
-	lw	v1,32($fp)
-	li	v0,-1			# 0xffffffffffffffff
-	bne	v1,v0,L29
-	li	v0,1			# 0x1
-	sw	v0,36($fp)
-	b	L17
-L29:
-	lbu	v0,25($fp)
-	sb	v0,24($fp)
-	b	L19
-L20:
-	lw	v0,32($fp)
-	blez	v0,L30
-	addu	v0,$fp,25
-	lw	a0,60($fp)
-	move	a1,v0
-	li	a2,1			# 0x1
-	la	t9,write
-	jal	ra,t9
-	sw	v0,32($fp)
-L30:
-	lw	v1,32($fp)
-	li	v0,-1			# 0xffffffffffffffff
-	bne	v1,v0,L31
-	li	v0,1			# 0x1
-	sw	v0,36($fp)
-	b	L17
-L31:
-	lw	v0,32($fp)
-	sw	v0,36($fp)
-L17:
-	lw	v0,36($fp)
-	move	sp,$fp
-	lw	ra,48(sp)
-	lw	$fp,44(sp)
-	addu	sp,sp,56
-	j	ra
-	.end	dos2unix
-	.size	dos2unix, .-dos2unix
+	.frame        $fp, FRAME_SIZE, ra	
+	.set          noreorder
+	.cpload	      t9
+	.set          reorder
+	subu          sp, sp, FRAME_SIZE
+	.cprestore    8
+	sw            $fp, FP(sp)
+    move          $fp, sp
+    sw            ra, PADDING_1($fp)
+    
+# Begin: read first char
+    ori           a0, zero, STDIN_FILENO
+    la            a1, TEMP_0($fp)               # &t[0] (old byte)
+    ori           a2, zero, 1
+    ori           v0, zero, SYS_read
+    syscall                                # read(stdin, &t[0], 1)
 
+check_read:
+    bnez          v0, cont_val
+    # File was empty
+    ori           v0, zero, EXIT_SUCCESS
+    j             end
+cont_val:
+    addiu         a0, v0, 1
+    bnez          a0, read_new
+    # End with error: read returned -1
+    ori           v0, zero, EXIT_FAILURE
+    j             end
+
+# Continue reading using delayed write
+read_new:
+    ori           a0, zero, STDIN_FILENO
+    la            a1, TEMP_1($fp)              # &t[1] (new byte)
+    ori           a2, zero, 1
+    ori           v0, zero, SYS_read
+    syscall                               # read(stdin, &t[1], 1)
+
+check_read_2:
+    bnez          v0, cont_val_2          # Check if reached EOF
+    ori           a0, zero, STDOUT_FILENO
+    la            a1, TEMP_0($fp)
+    ori           a2, zero, 1
+    ori           v0, zero, SYS_write     
+    syscall                               # We write the oldest byte
+    ori           v0, zero, EXIT_SUCCESS
+    j             end
+cont_val_2:
+    addiu         a0, v0, 1               # Check if read returned -1
+    bnez          a0, continue
+    # Jump with error
+    ori           v0, zero, EXIT_FAILURE
+    j             end
+    
+continue:
+    lbu           a0, TEMP_0($fp)              # a0 = t[0]
+    lbu           a1, TEMP_1($fp)              # a1 = t[1]
+    subu          a0, a0, ASCII_CR        
+    subu          a1, a1, ASCII_LF
+    or            a0, a0, a1
+    beqz          a0, write_LF            # if (a0 == CR && a1 == LF) write_LF()
+
+    ori           a0, zero, STDOUT_FILENO
+    la            a1, TEMP_0($fp)
+    ori           a2, zero, 1
+    ori           v0, zero, SYS_write
+    syscall                               # write(stdout, &t[0], 1)
+    lbu           a0, TEMP_1($fp)              # a0 = t[1]
+    sw            a0, TEMP_0($fp)              # t[0] = a0
+    j             read_new
+    
+write_LF:
+    ori           a0, zero, ASCII_LF      
+    sw            a0, TEMP_0($fp)              # t[0] = '\n'
+    j             read_new                # We write LF in the next cycle
+end:
+    lw            ra,  PADDING_1($fp)
+    lw            $fp, FP(sp)
+    addiu         sp, sp, FRAME_SIZE
+    jr            ra
+.end dos2unix    
+    
